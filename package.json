@@ -1,7 +1,7 @@
 {
   "name": "rotawise",
   "version": "1.0.0",
-  "main": "expo-router/entry",
+  "main": "index.ts",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -31,6 +31,7 @@
     "expo-font": "~58.0.9",
     "expo-haptics": "~58.0.7",
     "expo-linking": "~58.0.14",
+    "expo-localization": "~58.0.5",
     "expo-print": "~58.0.8",
     "expo-router": "~58.0.29",
     "expo-sharing": "~58.0.21",

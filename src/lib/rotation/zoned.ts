@@ -3,7 +3,7 @@
  * Used for calendar export and for "how long was that shift really" on clock change
  * nights. Uses only Intl, so it is framework free and testable in any zone.
  */
-import { MINUTES_PER_DAY, parseISO } from './dates.ts';
+import { parseISO } from './dates.ts';
 import type { ISODate } from './dates.ts';
 import type { ShiftInstance } from './types.ts';
 
@@ -73,4 +73,3 @@ export function scheduledMinutes(shift: ShiftInstance): number {
   return shift.durationMinutes;
 }
 
-export { MINUTES_PER_DAY };

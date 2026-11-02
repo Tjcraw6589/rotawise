@@ -37,7 +37,7 @@ jest.mock('expo-print', () => ({
   printToFileAsync: jest.fn(async () => ({ uri: 'file:///mock.pdf' })),
 }));
 
-jest.mock('expo-calendar', () => ({
+jest.mock('expo-calendar/legacy', () => ({
   requestCalendarPermissionsAsync: jest.fn(async () => ({ status: 'granted', granted: true })),
   getCalendarsAsync: jest.fn(async () => []),
   getDefaultCalendarAsync: jest.fn(async () => ({ id: 'default', source: { id: 'src', name: 'Default' } })),
@@ -103,5 +103,43 @@ jest.mock('expo-sqlite', () => {
         return row ? { id, json: row.json } : null;
       },
     }),
+  };
+});
+
+jest.mock('expo-localization', () => ({
+  getLocales: () => [{ languageTag: 'en-US', languageCode: 'en', regionCode: 'US', currencyCode: 'USD', currencySymbol: '$' }],
+  getCalendars: () => [{ calendar: 'gregory', firstWeekday: 1, timeZone: 'UTC', uses24hourClock: false }],
+}));
+
+jest.mock('@bacons/apple-targets', () => {
+  const store = new Map<string, unknown>();
+  class ExtensionStorage {
+    static reloadWidget = jest.fn();
+    static reloadControls = jest.fn();
+    appGroup: string;
+    constructor(appGroup: string) {
+      this.appGroup = appGroup;
+    }
+    set(key: string, value: unknown) {
+      store.set(key, value);
+    }
+    get(key: string) {
+      return (store.get(key) as string | undefined) ?? null;
+    }
+    remove(key: string) {
+      store.delete(key);
+    }
+  }
+  return { ExtensionStorage, __store: store };
+});
+
+jest.mock('react-native-android-widget', () => {
+  const actual = jest.requireActual('react-native-android-widget/src/widgets/FlexWidget');
+  const text = jest.requireActual('react-native-android-widget/src/widgets/TextWidget');
+  return {
+    FlexWidget: actual.FlexWidget,
+    TextWidget: text.TextWidget,
+    requestWidgetUpdate: jest.fn(async () => undefined),
+    registerWidgetTaskHandler: jest.fn(),
   };
 });
