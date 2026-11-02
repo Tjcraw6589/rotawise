@@ -21,7 +21,20 @@ SQLite storage, fully offline, no account, no ads, no analytics.
 
 ## EAS builds
 
-BUILD_RESULTS
+Both builds compile on EAS (free plan, 7 of 30 builds used this month, no charges).
+
+| Build | Result | What was checked in the artifact |
+|---|---|---|
+| iOS simulator, commit 206fd60, [429157d7](https://expo.dev/accounts/tjcraw6589s-team/projects/rotawise/builds/429157d7-d3cf-44b3-8627-d470710f0795) | Finished | `Rotawise.app/PlugIns/RotawiseWidget.appex` is there: a 615 KB compiled SwiftUI binary, bundle `com.tyjcraw.rotawise.widget`, extension point `com.apple.widgetkit-extension`, iOS 17. So the Swift widget compiles and ships inside the app. |
+| Android preview APK, commit 206fd60, [cef0e14c](https://expo.dev/accounts/tjcraw6589s-team/projects/rotawise/builds/cef0e14c-6f0d-4cfd-8ee5-201bc8796e06) | Finished | The APK manifest declares the widget receivers (Today and Week) and the widget service. |
+
+Three earlier attempts failed and were fixed: the cloud's older npm rejected the lock file
+(builds now pin Node 24.17.0), RevenueCat 11.0.0 needs a CocoaPods release that does not exist
+yet (pinned 10.15.1, as in Bowerly), and an ignore rule had kept the Android widget files out
+of git. The only change after commit 206fd60 is the JavaScript tablet layout (commit 58a822c).
+
+A simulator build cannot be installed on an iPhone. The TestFlight build needs your one time
+Apple sign in (RELEASE_STEPS.md step 1).
 
 ## Not tested, and why
 
