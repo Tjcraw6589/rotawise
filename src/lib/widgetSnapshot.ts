@@ -90,6 +90,20 @@ function statusLabel(code: string): string {
   }
 }
 
+/**
+ * The short label for a day cell: the platoon letter on rotation shifts (plus D or N when
+ * the rotation has day and night shifts), the code alone for extra shifts (OT) and trade
+ * shifts (T+), the code for days off with a reason (K, T, V, S), else "off".
+ * The Swift widget mirrors this in cellLabel().
+ */
+export function dayCellLabel(platoon: string, on: boolean, code: string): string {
+  if (on) {
+    if (code === 'OT' || code === 'T+') return code;
+    return platoon + (code && code !== '24' ? code : '');
+  }
+  return code || 'off';
+}
+
 export interface WidgetDayCell {
   date: string;
   weekday: string;

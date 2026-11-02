@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import type { Profile } from '@/lib/model';
 import type { Override } from '@/lib/rotation';
 import { WEEKDAY_SHORT, summarizeDays, weekday } from '@/lib/rotation';
+import { dayCellLabel } from '@/lib/widgetSnapshot';
 import { PLATOON_COLORS } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
 
@@ -25,7 +26,7 @@ export function WeekStrip({ profile, overrides, from, days = 7 }: WeekStripProps
   return (
     <View style={styles.row} testID="week-strip">
       {list.map((d, i) => {
-        const label = d.on ? `${profile.platoon}${d.code && d.code !== '24' ? ` ${d.code}` : ''}` : d.code || 'Off';
+        const label = d.on || d.code ? dayCellLabel(profile.platoon, d.on, d.code) : 'Off';
         return (
           <View
             key={d.date}

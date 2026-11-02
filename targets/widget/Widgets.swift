@@ -136,6 +136,7 @@ struct WeekWidgetView: View {
 
     private func cellLabel(_ d: DayCell, platoon: String) -> String {
         if d.on {
+            if d.code == "OT" || d.code == "T+" { return d.code }
             return platoon + ((!d.code.isEmpty && d.code != "24") ? d.code : "")
         }
         return d.code.isEmpty ? "off" : d.code

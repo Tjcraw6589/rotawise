@@ -6,25 +6,29 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "node": "24.17.0"
     },
     "simulator": {
       "distribution": "internal",
       "ios": {
         "simulator": true
-      }
+      },
+      "node": "24.17.0"
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      }
+      },
+      "node": "24.17.0"
     },
     "production": {
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
-      }
+      },
+      "node": "24.17.0"
     }
   },
   "submit": {

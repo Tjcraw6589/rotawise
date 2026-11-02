@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import type { Profile } from '@/lib/model';
 import type { Override, Platoon , DaySummary } from '@/lib/rotation';
 import { PLATOONS, WEEKDAY_SHORT, daysInMonth, formatLongDate, monthGrid, platoonsOn, summarizeDays, toISO } from '@/lib/rotation';
+import { dayCellLabel } from '@/lib/widgetSnapshot';
 import { PLATOON_COLORS } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
 
@@ -115,8 +116,7 @@ export function MonthCalendar({ year, month, profile, overrides, showAll, overla
                   </View>
                   {on ? (
                     <AppText style={[styles.code, { color: pc.text }]} numberOfLines={1}>
-                      {profile.platoon}
-                      {code && code !== '24' ? code.replace('+', '') : ''}
+                      {dayCellLabel(profile.platoon, true, code)}
                     </AppText>
                   ) : code ? (
                     <AppText style={[styles.code, { color: colors.textMuted }]}>{code}</AppText>
@@ -169,7 +169,7 @@ export function MonthCalendar({ year, month, profile, overrides, showAll, overla
           </View>
         ))}
         <AppText variant="caption" tone="muted">
-          K Kelly, T traded, V vacation, S sick
+          K Kelly, T traded away, T+ trade shift, OT overtime, V vacation, S sick
         </AppText>
       </View>
     </View>

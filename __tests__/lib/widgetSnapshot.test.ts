@@ -124,3 +124,15 @@ describe('the Swift widget mirrors the TypeScript rules', () => {
     expect(swift).toContain('policy: .atEnd');
   });
 });
+
+describe('day cell labels', () => {
+  it('keeps codes readable instead of gluing them to the platoon letter', () => {
+    const { dayCellLabel } = jest.requireActual('@/lib/widgetSnapshot') as typeof import('@/lib/widgetSnapshot');
+    expect(dayCellLabel('B', true, '24')).toBe('B');
+    expect(dayCellLabel('C', true, 'N')).toBe('CN');
+    expect(dayCellLabel('B', true, 'OT')).toBe('OT');
+    expect(dayCellLabel('B', true, 'T+')).toBe('T+');
+    expect(dayCellLabel('B', false, 'K')).toBe('K');
+    expect(dayCellLabel('B', false, '')).toBe('off');
+  });
+});

@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import type { WidgetBackground } from '@/lib/model';
 import type { WidgetSnapshot } from '@/lib/widgetSnapshot';
-import { widgetColors, widgetView } from '@/lib/widgetSnapshot';
+import { dayCellLabel, widgetColors, widgetView } from '@/lib/widgetSnapshot';
 
 import { AppText } from './AppText';
 
@@ -54,7 +54,7 @@ export function WidgetPreview({ snapshot, date, minutes, background, dark }: Wid
               <AppText style={{ color: p.foreground, fontSize: 12, fontWeight: d.isToday ? '800' : '400' }}>{d.dayOfMonth}</AppText>
               <View style={[styles.pill, { backgroundColor: d.on ? view.fill : p.chipOff }]}>
                 <AppText style={{ color: d.on ? view.text : p.muted, fontSize: 10, fontWeight: '800' }} numberOfLines={1}>
-                  {d.on ? view.platoon + (d.code && d.code !== '24' ? d.code : '') : d.code || 'off'}
+                  {dayCellLabel(view.platoon, d.on, d.code)}
                 </AppText>
               </View>
             </View>
