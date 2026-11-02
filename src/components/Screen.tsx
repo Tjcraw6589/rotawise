@@ -33,20 +33,20 @@ export function Screen({
   const body = scroll ? (
     <ScrollView
       style={styles.flex}
-      contentContainerStyle={[padding, { paddingBottom: spacing.xxl }, contentStyle]}
+      contentContainerStyle={[padding, styles.column, { paddingBottom: spacing.xxl }, contentStyle]}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
       {children}
     </ScrollView>
   ) : (
-    <View style={[styles.flex, padding, contentStyle]}>{children}</View>
+    <View style={[styles.flex, padding, styles.column, contentStyle]}>{children}</View>
   );
   return (
     <SafeAreaView edges={edges} style={[styles.flex, { backgroundColor: colors.background }, style]} testID={testID}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {body}
-        {footer}
+        {footer ? <View style={styles.column}>{footer}</View> : null}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -54,4 +54,6 @@ export function Screen({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  // On tablets keep a readable phone like column instead of stretching edge to edge.
+  column: { width: '100%', maxWidth: 720, alignSelf: 'center' },
 });

@@ -51,3 +51,17 @@ Fully offline. No account. No ads, analytics or tracking.
 - Storage: expo-sqlite on iOS and Android through one small repository interface;
   the web build uses localStorage behind the same interface so tests and the web
   smoke test exercise the same screens.
+
+## Status (2 Nov 2026)
+
+| # | Milestone | Status |
+|---|-----------|--------|
+| M0 | Name and plan | Done. Platoon taken on both stores; user picked Rotawise |
+| M1 | Skeleton | Done |
+| M2 | Rotation math | Done. 124 rotation tests (every preset, leap years, clock changes, year ends, midnight tours, Kelly intervals and phase, trades and leave over the base) |
+| M3 | Free tier | Done. Tested in Jest router flows and the Playwright web smoke test |
+| M4 | Pro | Done in code and tests. Real purchases need the RevenueCat keys (RELEASE_STEPS.md step 3) |
+| M5 | Widgets | Code done; Android widget trees and the shared rules are unit tested. iOS widget compiles only on EAS and can only be seen on an iPhone via TestFlight |
+| M6 | Quality gate | tsc (app and site), eslint, 180 Jest tests, 3 Playwright tests all pass |
+| M7 | Landing site | Done. 22 pages; npm run site, then npm run site:serve |
+| M8 | Store and release | Icon, feature graphic, screenshots, STORE_LISTING.md, RELEASE_STEPS.md done. EAS builds: see REPORT.md |
