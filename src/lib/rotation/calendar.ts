@@ -44,9 +44,14 @@ export function markDays(shifts: readonly ShiftInstance[], from: ISODate, to: IS
   return map;
 }
 
-/** Platoons on duty for a whole rotation on a given date (starting a shift that day). */
+/**
+ * Platoons on duty for a whole rotation on a given date (starting a shift that day).
+ * Kelly days are ignored: they belong to a person or Kelly group, and the platoon is
+ * still on duty.
+ */
 export function platoonsOn(rotation: Rotation, date: ISODate): Platoon[] {
-  return PLATOONS.slice(0, rotation.platoonCount).filter((p) => effectiveShifts(rotation, p, date, date).some(isWorking));
+  const noKelly = { ...rotation, kelly: null };
+  return PLATOONS.slice(0, rotation.platoonCount).filter((p) => effectiveShifts(noKelly, p, date, date).some(isWorking));
 }
 
 export interface DaySummary {

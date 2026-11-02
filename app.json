@@ -20,7 +20,9 @@
         "NSCalendarsWriteOnlyAccessUsageDescription": "Rotawise adds your shifts to a calendar you choose so a partner can see them through a shared calendar."
       },
       "entitlements": {
-        "com.apple.security.application-groups": ["group.com.tyjcraw.rotawise"]
+        "com.apple.security.application-groups": [
+          "group.com.tyjcraw.rotawise"
+        ]
       },
       "privacyManifests": {
         "NSPrivacyTracking": false,
@@ -28,19 +30,27 @@
         "NSPrivacyAccessedAPITypes": [
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
-            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
-            "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "35F9.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
-            "NSPrivacyAccessedAPITypeReasons": ["E174.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1"
+            ]
           }
         ]
       }
@@ -128,6 +138,45 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "tjcraw6589s-team",
+    "extra": {
+      "monetization": {
+        "revenueCatIos": "",
+        "revenueCatAndroid": "",
+        "proEntitlement": "pro",
+        "proProductId": "rotawise_pro_lifetime"
+      },
+      "support": {
+        "email": "tyjcraw@gmail.com",
+        "siteUrl": "https://tjcraw6589.github.io/rotawise/",
+        "privacyUrl": "https://tjcraw6589.github.io/rotawise/privacy.html"
+      },
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "bundleIdentifier": "com.tyjcraw.rotawise.widget",
+                  "targetName": "RotawiseWidget",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.tyjcraw.rotawise"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "1b254e8f-b5e3-4e51-9e62-dc6f226505cd"
+      }
     }
   }
 }

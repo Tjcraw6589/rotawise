@@ -110,7 +110,7 @@ export default function YearScreen() {
       </View>
       {message ? <Notice tone="info" message={message} testID="year-message" /> : null}
       <View style={[styles.buttons, { marginTop: spacing.md }]}>
-        <Button label="Print or share PDF" onPress={() => void pdf()} loading={busy === 'pdf'} style={styles.flexBtn} testID="year-pdf" />
+        <Button label="Print PDF" onPress={() => void pdf()} loading={busy === 'pdf'} style={styles.flexBtn} testID="year-pdf" />
         <Button label="Share image" variant="secondary" onPress={() => void image()} loading={busy === 'image'} style={styles.flexBtn} testID="year-image" />
       </View>
     </Screen>

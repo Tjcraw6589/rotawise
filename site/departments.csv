@@ -1,0 +1,11 @@
+department,city,state,rotation,anchor_date,anchor_platoon,kelly_every,status,note
+Chicago Fire Department,Chicago,IL,24-48,2027-01-01,A,7,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.
+Los Angeles Fire Department,Los Angeles,CA,24-48,2027-01-01,A,,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.
+Houston Fire Department,Houston,TX,24-72,2027-01-01,A,,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.
+Phoenix Fire Department,Phoenix,AZ,48-96,2027-01-01,A,,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.
+San Antonio Fire Department,San Antonio,TX,24-48,2027-01-01,A,,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.
+Austin Fire Department,Austin,TX,24-72,2027-01-01,A,,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.
+Denver Fire Department,Denver,CO,48-96,2027-01-01,A,,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.
+Seattle Fire Department,Seattle,WA,kelly,2027-01-01,A,,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.
+Boston Fire Department,Boston,MA,24-72,2027-01-01,A,,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.
+Portland Fire and Rescue,Portland,OR,kelly,2027-01-01,A,,UNVERIFIED,Example only. Rotation and anchor date are placeholders. Confirm with the department before publishing.

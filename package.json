@@ -17,7 +17,7 @@
     "assets": "node scripts/generate-assets.mjs",
     "screenshots": "node scripts/screenshots.mjs",
     "site": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON site/build.ts",
-    "site:serve": "node scripts/serve-dir.mjs site/dist 4180"
+    "site:serve": "node scripts/serve-dir.mjs site/dist 4192"
   },
   "dependencies": {
     "@bacons/apple-targets": "^5.0.0",
@@ -41,12 +41,12 @@
     "expo-system-ui": "~58.0.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-native": "0.88.0",
+    "react-native": "0.88.1",
     "react-native-android-widget": "^0.26.0",
     "react-native-purchases": "^11.0.0",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
-    "react-native-view-shot": "^6.2.1",
+    "react-native-view-shot": "6.1.1",
     "react-native-web": "^0.21.4",
     "zustand": "^5.0.16"
   },

@@ -60,3 +60,13 @@ describe('platoon colors are readable and color blind safe', () => {
     expect(new Set(Object.values(PLATOON_COLORS).map((c) => c.fill)).size).toBe(4);
   });
 });
+
+describe('Kelly days on shared calendars', () => {
+  it('an all platoons calendar still shows the platoon on duty on Kelly days', () => {
+    const k = rotationFromPreset('24-48', '2027-01-01', { everyNthShift: 7 });
+    const all = yearCalendarBlock({ year: 2027, rotation: k, platoons: ['A', 'B', 'C'], title: 'All' });
+    expect(all.match(/class="pb"/g)!.length).toBe(365 + 3);
+    const mine = yearCalendarBlock({ year: 2027, rotation: k, platoons: ['A'], title: 'A' });
+    expect(mine.match(/<span class="b">K<\/span>/g)!.length).toBe(Math.floor(122 / 7));
+  });
+});

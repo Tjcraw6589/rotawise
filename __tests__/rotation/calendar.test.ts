@@ -25,6 +25,11 @@ describe('platoons on duty', () => {
     expect(platoonsOn(r, '2027-01-01')).toEqual(['A']);
     expect(platoonsOn(r, '2027-01-03')).toEqual(['C']);
   });
+  it('keeps a platoon on duty on its Kelly days (Kelly days are personal)', () => {
+    const r = rotationFromPreset('24-48', '2027-01-01', { everyNthShift: 7 });
+    // Jan 19 is A's 7th tour, a Kelly day for that Kelly group, but A is still the platoon on duty.
+    expect(platoonsOn(r, '2027-01-19')).toEqual(['A']);
+  });
   it('shows a day and a night platoon on Pitman', () => {
     const r = rotationFromPreset('pitman', '2027-01-01', null);
     expect(platoonsOn(r, '2027-01-01')).toEqual(['A', 'C']);

@@ -32,15 +32,18 @@ function dayInfo(opts: YearCalendarOptions): Map<string, DayInfo> {
   const to = toISO({ year: opts.year, month: 12, day: 31 });
   const map = new Map<string, DayInfo>();
   const single = opts.platoons.length === 1;
+  // Kelly days belong to a person or Kelly group, not the whole platoon, so a calendar of
+  // who is on duty ignores them; a single platoon calendar shows them as K.
+  const rotation = single ? opts.rotation : { ...opts.rotation, kelly: null };
   for (const p of opts.platoons) {
-    const shifts: ShiftInstance[] = effectiveShifts(opts.rotation, p, from, to, single ? (opts.overrides ?? []) : []);
+    const shifts: ShiftInstance[] = effectiveShifts(rotation, p, from, to, single ? (opts.overrides ?? []) : []);
     for (const s of shifts) {
       const entry = map.get(s.date) ?? { platoons: [], code: '' };
       if (isWorking(s)) {
         if (!entry.platoons.includes(p)) entry.platoons.push(p);
-        if (single) entry.code = codeFor(s, opts.rotation);
+        if (single) entry.code = codeFor(s, rotation);
       } else if (single && !entry.code) {
-        entry.code = codeFor(s, opts.rotation);
+        entry.code = codeFor(s, rotation);
       }
       map.set(s.date, entry);
     }
@@ -105,7 +108,7 @@ export const YEAR_CALENDAR_CSS = `
 .yc td .b{display:block;font-weight:800;font-size:9px;line-height:10px}
 .yc td.on{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .yc td.off-code .b{color:#4F5D6B}
-.yc .pb{display:inline-block;min-width:10px;padding:0 2px;margin-right:1px;border-radius:3px;font-weight:800;font-size:8px;line-height:10px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.yc .pb{display:inline-block;min-width:10px;height:auto;padding:0 2px;margin-right:1px;border-radius:3px;font-weight:800;font-size:8px;line-height:10px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .yc .legend{margin-top:8px;font-size:11px;display:flex;flex-wrap:wrap;gap:6px 14px}
 .yc .lg .pb{font-size:10px;line-height:13px;min-width:13px}
 .yc .foot{font-size:10px;color:#4F5D6B;margin:6px 0 0}

@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "rotawise-web", "runtimeExecutable": "node", "runtimeArgs": ["scripts/serve-dist.mjs", "4191"], "port": 4191 },
+    { "name": "rotawise-site", "runtimeExecutable": "node", "runtimeArgs": ["scripts/serve-dir.mjs", "site/dist", "4192"], "port": 4192 }
+  ]
+}
