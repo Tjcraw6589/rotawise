@@ -1,0 +1,133 @@
+{
+  "expo": {
+    "name": "Rotawise",
+    "slug": "rotawise",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "rotawise",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#F4F6F8",
+    "primaryColor": "#0072B2",
+    "description": "Your rotation, on your home screen. Shift calendar for firefighters, EMS, police and every rotating shift worker. 24/48, 48/96, Kelly, Pitman, DuPont and custom patterns. Offline, no account. Pro is a one time purchase, never a subscription.",
+    "ios": {
+      "bundleIdentifier": "com.tyjcraw.rotawise",
+      "supportsTablet": true,
+      "appleTeamId": "JA88SJ7PGW",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCalendarsFullAccessUsageDescription": "Rotawise adds your shifts to a calendar you choose so a partner can see them through a shared calendar. Nothing is read back or sent anywhere.",
+        "NSCalendarsWriteOnlyAccessUsageDescription": "Rotawise adds your shifts to a calendar you choose so a partner can see them through a shared calendar."
+      },
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.com.tyjcraw.rotawise"]
+      },
+      "privacyManifests": {
+        "NSPrivacyTracking": false,
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": ["E174.1"]
+          }
+        ]
+      }
+    },
+    "android": {
+      "package": "com.tyjcraw.rotawise",
+      "adaptiveIcon": {
+        "backgroundColor": "#0072B2",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR",
+        "com.android.vending.BILLING"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "predictiveBackGestureEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#F4F6F8",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#0B1118"
+          }
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Rotawise adds your shifts to a calendar you choose so a partner can see them through a shared calendar."
+        }
+      ],
+      "@bacons/apple-targets",
+      [
+        "react-native-android-widget",
+        {
+          "fonts": [],
+          "widgets": [
+            {
+              "name": "Today",
+              "label": "Rotawise Today",
+              "description": "Are you on or off today, and when is your next shift",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/widget-preview-today.png",
+              "resizeMode": "horizontal|vertical"
+            },
+            {
+              "name": "Week",
+              "label": "Rotawise Next 7 Days",
+              "description": "Your next seven days at a glance",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/widget-preview-week.png",
+              "resizeMode": "horizontal|vertical"
+            }
+          ]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

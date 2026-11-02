@@ -1,0 +1,93 @@
+{
+  "name": "rotawise",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p site",
+    "lint": "expo lint",
+    "test": "jest --ci",
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test -c e2e/playwright.config.ts",
+    "verify": "npm run typecheck && npm run lint && npm test",
+    "export:web": "expo export --platform web --clear",
+    "assets": "node scripts/generate-assets.mjs",
+    "screenshots": "node scripts/screenshots.mjs",
+    "site": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON site/build.ts",
+    "site:serve": "node scripts/serve-dir.mjs site/dist 4180"
+  },
+  "dependencies": {
+    "@bacons/apple-targets": "^5.0.0",
+    "@expo/vector-icons": "^15.0.2",
+    "expo": "~58.0.22",
+    "expo-asset": "~58.0.18",
+    "expo-calendar": "~58.0.6",
+    "expo-constants": "~58.0.13",
+    "expo-crypto": "~58.0.7",
+    "expo-file-system": "~58.0.13",
+    "expo-font": "~58.0.9",
+    "expo-haptics": "~58.0.7",
+    "expo-linking": "~58.0.14",
+    "expo-print": "~58.0.8",
+    "expo-router": "~58.0.29",
+    "expo-sharing": "~58.0.21",
+    "expo-splash-screen": "~58.0.11",
+    "expo-sqlite": "~58.0.15",
+    "expo-status-bar": "~58.0.4",
+    "expo-system-ui": "~58.0.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-native": "0.88.0",
+    "react-native-android-widget": "^0.26.0",
+    "react-native-purchases": "^11.0.0",
+    "react-native-safe-area-context": "~5.10.1",
+    "react-native-screens": "~4.30.0",
+    "react-native-view-shot": "^6.2.1",
+    "react-native-web": "^0.21.4",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@testing-library/react-native": "^14.1.0",
+    "@types/jest": "30.0.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "~19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~58.0.4",
+    "jest": "~30.5.2",
+    "jest-expo": "~58.0.13",
+    "sharp": "^0.35.5",
+    "typescript": "~6.0.3"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "setupFiles": [
+      "<rootDir>/jest.setup.ts"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/e2e/",
+      "/dist/",
+      "/site/"
+    ],
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|standard-navigation|zustand|react-native-android-widget))",
+      "/node_modules/react-native-reanimated/plugin/",
+      "/node_modules/@react-native/babel-preset/"
+    ],
+    "collectCoverageFrom": [
+      "src/lib/**/*.ts",
+      "src/store/**/*.ts"
+    ],
+    "testMatch": [
+      "<rootDir>/__tests__/**/*.test.(ts|tsx)"
+    ]
+  },
+  "private": true
+}
