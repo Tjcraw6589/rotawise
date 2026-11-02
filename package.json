@@ -43,7 +43,7 @@
     "react-dom": "19.3.0",
     "react-native": "0.88.1",
     "react-native-android-widget": "^0.26.0",
-    "react-native-purchases": "^11.0.0",
+    "react-native-purchases": "~10.15.1",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
     "react-native-view-shot": "6.1.1",

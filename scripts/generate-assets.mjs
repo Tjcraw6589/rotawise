@@ -108,3 +108,15 @@ await sharp(Buffer.from(widgetPreview(320, 320, false))).png().toFile(join(out, 
 await sharp(Buffer.from(widgetPreview(640, 300, true))).png().toFile(join(out, 'widget-preview-week.png'));
 console.log('./assets/widget-preview-today.png\n./assets/widget-preview-week.png');
 console.log(`Backgrounds: light ${LIGHT_BG}, dark ${DARK_BG}. Platoon D accent ${PD} is unused in the mark on purpose (three arrows read better).`);
+
+// Google Play feature graphic, 1024 x 500.
+mkdirSync(join(root, 'store'), { recursive: true });
+const feature = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">${defs}
+<rect width="1024" height="500" fill="url(#g)"/>
+<g transform="translate(40 50) scale(0.4)">${mark(1)}</g>
+<text x="470" y="200" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="900" fill="#FFFFFF">Rotawise</text>
+<text x="472" y="260" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#DCEBF5">Your rotation, on your home screen.</text>
+<text x="472" y="305" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#F0B429">Pay once. Never a subscription.</text>
+</svg>`;
+await sharp(Buffer.from(feature)).png().toFile(join(root, 'store', 'feature-graphic.png'));
+console.log('./store/feature-graphic.png');
