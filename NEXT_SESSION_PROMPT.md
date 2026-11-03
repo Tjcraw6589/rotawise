@@ -7,7 +7,7 @@ Use my new plugins where they help: Mobile App Design (iOS) to review the onboar
 Do these in order, telling me only the steps I must do myself:
 1. Ask me for a screenshot of the widgets on my iPhone. Do not claim the widgets work until I confirm they render and roll over at midnight.
 2. Review the main screens with the iOS design plugin, fix what it finds, keep every test green, and send a new TestFlight build.
-3. Walk me through RevenueCat (login captiancraw@gmail.com): I upload the .p8 key myself; you set up product rotawise_pro_lifetime, entitlement pro and offering default, put the public appl_ key in app.json, rebuild for TestFlight, and help me test a sandbox purchase and Restore purchases.
+3. Walk me through RevenueCat (my usual RevenueCat sign in): I upload the .p8 key myself; you set up product rotawise_pro_lifetime, entitlement pro and offering default, put the public appl_ key in app.json, rebuild for TestFlight, and help me test a sandbox purchase and Restore purchases.
 4. Fill the App Store Connect listing from STORE_LISTING.md in the browser pane after I sign in. I click the age rating, content rights and App Privacy confirmations and drag in the screenshots.
 5. When I have created a public GitHub repo named rotawise, push the code, turn on GitHub Pages (the workflow is in .github/workflows/pages.yml) and run an SEO check on the site.
 

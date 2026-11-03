@@ -33,7 +33,7 @@ all of that, but only after you sign in to Apple once.
 
 RevenueCat confirms purchases and makes Restore purchases work. Free until $2,500 a month in revenue.
 
-1. Sign in at app.revenuecat.com (captiancraw@gmail.com) and create a project named **Rotawise**.
+1. Sign in at app.revenuecat.com (your RevenueCat sign in) and create a project named **Rotawise**.
 2. Add an **App Store** app with bundle ID `com.tyjcraw.rotawise`.
 3. Upload your **In App Purchase key** (.p8 file) on that app's page. You can reuse the
    Bowerly key (Key ID HF669L7QMN) if you still have the file; otherwise App Store Connect,
