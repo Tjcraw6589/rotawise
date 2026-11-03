@@ -25,7 +25,7 @@ all of that, but only after you sign in to Apple once.
    $4.99 one time purchase `rotawise_pro_lifetime`, and fills in the listing from
    `STORE_LISTING.md`.
 3. Click the few things Apple only lets you click: **Content Rights**, **Age Rating**, and
-   **App Privacy** (see the privacy choice in `STORE_LISTING.md`; Claude opens each one for you).
+   **App Privacy** (use the privacy answers in `STORE_LISTING.md`; Claude opens each one for you).
 4. Drag the screenshots from `store\screenshots\iphone-6.9` (and `ipad-13`) into the
    media manager. The browser pane cannot upload files, so this one is yours.
 

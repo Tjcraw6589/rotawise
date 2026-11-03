@@ -55,10 +55,9 @@ Apple sign in (RELEASE_STEPS.md step 1).
 
 ## Known gaps and honest risks
 
-1. **Privacy label.** The app collects nothing, but RevenueCat sees an anonymous ID and the
-   purchase receipt. Apple may expect "Purchase History, not linked". `STORE_LISTING.md`
-   explains the two choices. Truly "Data Not Collected" means dropping RevenueCat for direct
-   StoreKit and Play Billing; I can do that if you prefer.
+1. **Privacy label.** Decided: keep RevenueCat. The label is "Purchases, Purchase History,
+   not linked to you, app functionality" (answers in `STORE_LISTING.md`), not "Data Not
+   Collected". The app, manifest, site and policy all say the same thing.
 2. **iOS widget compile risk** is limited to the Swift files; see the EAS result above.
 3. **Department pages are examples.** All 10 rows are marked UNVERIFIED with placeholder
    dates. They show a warning banner and are excluded from search until you confirm them.

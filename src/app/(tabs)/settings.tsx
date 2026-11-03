@@ -127,7 +127,7 @@ export default function SettingsScreen() {
 
       <SectionHeader title="About" />
       <Card padded={false}>
-        <Row title="Privacy" subtitle="Data not collected. No account, ads or tracking." onPress={() => router.push({ pathname: '/about', params: { doc: 'privacy' } })} testID="settings-privacy" />
+        <Row title="Privacy" subtitle="Your schedule stays on this phone. No account, ads or tracking." onPress={() => router.push({ pathname: '/about', params: { doc: 'privacy' } })} testID="settings-privacy" />
         <Row title="Help and support" onPress={() => router.push({ pathname: '/about', params: { doc: 'support' } })} testID="settings-support" />
         <Row title="Version" value={APP_VERSION} last />
       </Card>

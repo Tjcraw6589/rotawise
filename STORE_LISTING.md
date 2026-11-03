@@ -80,20 +80,25 @@ Rotawise calculates the rotation you set up. Always check your department's offi
 
 ## Privacy answers (App Store "App Privacy", Google "Data safety")
 
-The brief asks for "Data Not Collected". The app itself collects nothing. One honest caveat:
+Decided 2 Nov 2026: keep RevenueCat and answer honestly for it. The app itself sends nothing;
 RevenueCat, which checks the Pro purchase, receives an anonymous app user ID and the purchase
-receipt. RevenueCat's own guidance is to declare **Purchases: Purchase History**, used for
-**App Functionality**, **not linked** to the user, **not used for tracking**. That is how the
-Bowerly listing was answered. Pick one:
+receipt.
 
-1. **Recommended, safest with review:** declare Purchase History as above (everything else: not collected).
-2. **Data Not Collected:** only fully accurate if the app drops RevenueCat and uses StoreKit and
-   Google Play Billing directly. That is a code change; ask and it will be done.
+**App Store, App Privacy:**
+1. "Do you or your third party partners collect data from this app?" **Yes**.
+2. Data type: **Purchases, Purchase History**. Nothing else.
+3. Used for: **App Functionality** only.
+4. Linked to the user's identity: **No**.
+5. Used for tracking: **No**.
 
-Google Data safety: "No data shared with third parties"; collected: "Purchase history"
-(app functionality, not shared, processed ephemerally is false), data is encrypted in transit,
-users cannot request deletion because nothing is tied to them. If you choose option 2, answer
-"No data collected".
+The label then reads "Data Not Linked to You: Purchases". This matches the app's privacy
+manifest (`app.json`) and the privacy policy.
+
+**Google Play, Data safety** (when the Play account exists):
+- Collects data: **Yes**, Financial info, **Purchase history**, collected not shared,
+  required, for **App functionality**, not processed ephemerally.
+- Encrypted in transit: **Yes**. Deletion request: data is not tied to a person, so answer
+  that users can delete by uninstalling.
 
 ## Screenshots
 

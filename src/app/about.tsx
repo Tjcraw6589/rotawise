@@ -11,7 +11,7 @@ import { PRIVACY_URL, SITE_URL, SUPPORT_EMAIL } from '@/config/monetization';
 import { useTheme } from '@/theme/useTheme';
 
 const PRIVACY: { title: string; body: string }[] = [
-  { title: 'No data collected', body: 'Rotawise does not collect, store or send your schedule, trades, pay or leave anywhere. Everything stays in a database on this phone.' },
+  { title: 'Your schedule stays on your phone', body: 'Rotawise never sends your schedule, trades, pay or leave anywhere. Everything stays in a database on this phone.' },
   { title: 'No account', body: 'There is nothing to sign up for and nothing to log in to.' },
   { title: 'No ads, analytics or tracking', body: 'Rotawise has no advertising, no analytics and no tracking of any kind.' },
   {

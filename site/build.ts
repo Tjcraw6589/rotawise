@@ -312,15 +312,15 @@ ${storeButtons()}
 page({
   path: 'privacy.html',
   title: 'Rotawise Privacy Policy',
-  description: 'Rotawise collects no data. No account, no ads, no analytics, no tracking.',
-  body: `<div class="hero"><h1>Privacy Policy</h1><p class="lead">Short version: Rotawise collects no data.</p></div>
+  description: 'Your schedule never leaves your phone. No account, no ads, no analytics, no tracking.',
+  body: `<div class="hero"><h1>Privacy Policy</h1><p class="lead">Short version: your schedule never leaves your phone. The only thing that leaves it is an anonymous purchase receipt, and only if you buy Pro.</p></div>
 <div class="card">
 <h3>What stays on your phone</h3><p>Your rotation, platoon, trades, overtime, pay settings and leave are stored only in a database on your device. They are never sent to us or anyone else. Deleting the app deletes them.</p>
 <h3 style="margin-top:16px">No account, ads, analytics or tracking</h3><p>Rotawise has no sign in, shows no ads, contains no analytics and does not track you across apps or websites.</p>
 <h3 style="margin-top:16px">Purchases</h3><p>Rotawise Pro is a one time in app purchase handled by Apple (App Store) or Google (Google Play). To confirm and restore the purchase, the app uses RevenueCat, which receives an anonymous app user ID and the store's purchase receipt. This is not linked to your name, email or schedule. See RevenueCat's privacy policy at revenuecat.com.</p>
 <h3 style="margin-top:16px">Calendar</h3><p>Only if you use Share with a calendar, the app asks for calendar access and adds your shifts to the calendar you pick. It does not read your other events.</p>
 <h3 style="margin-top:16px">Widgets</h3><p>Home screen widgets read a copy of your schedule that the app keeps on your device for them.</p>
-<h3 style="margin-top:16px">Children</h3><p>Rotawise is not directed at children and collects no data from anyone.</p>
+<h3 style="margin-top:16px">Children</h3><p>Rotawise is not directed at children and collects no personal information from anyone.</p>
 <h3 style="margin-top:16px">Contact</h3><p>Questions: <a href="mailto:${escapeHtml(config.supportEmail)}">${escapeHtml(config.supportEmail)}</a>. Last updated November 2, 2026.</p>
 </div>`,
 });
