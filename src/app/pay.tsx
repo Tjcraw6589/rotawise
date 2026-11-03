@@ -64,9 +64,9 @@ export default function PayScreen() {
       ) : null}
       {pay.kind === 'custom' ? <Stepper label="Days in a period" value={pay.customLengthDays ?? 28} min={1} max={62} onChange={(n) => set({ customLengthDays: n })} testID="pay-length" /> : null}
       <Stepper
-        label="Payday"
+        label="Paid after period ends"
         value={pay.paydayOffsetDays}
-        display={pay.paydayOffsetDays === 0 ? 'Last day' : `${pay.paydayOffsetDays} days after`}
+        display={pay.paydayOffsetDays === 0 ? 'Same day' : `${pay.paydayOffsetDays} ${pay.paydayOffsetDays === 1 ? 'day' : 'days'}`}
         min={0}
         max={30}
         onChange={(n) => set({ paydayOffsetDays: n })}
@@ -86,6 +86,9 @@ export default function PayScreen() {
         testID="pay-rate"
       />
       <Stepper label="Straight time hours per period" value={pay.regularHoursPerPeriod} display={formatHours(pay.regularHoursPerPeriod)} min={1} max={400} onChange={(n) => set({ regularHoursPerPeriod: n })} testID="pay-regular" />
+      <AppText variant="caption" tone="muted" style={{ marginTop: -spacing.sm, marginBottom: spacing.md }}>
+        Hours paid at your normal rate before overtime starts. Firefighters on a 14 day period often use 106; most others use 80 for two weeks or 40 for one.
+      </AppText>
       <Stepper label="Overtime multiplier" value={pay.otMultiplier} display={`${pay.otMultiplier.toFixed(2)}x`} step={0.25} min={1} max={3} onChange={(n) => set({ otMultiplier: n })} testID="pay-ot" />
       <Button
         label={dirty ? 'Save pay settings' : 'Saved'}

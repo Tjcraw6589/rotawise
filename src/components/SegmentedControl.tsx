@@ -32,11 +32,11 @@ export function SegmentedControl<K extends string>({ options, value, onChange, t
             }}
             style={[
               styles.segment,
-              { borderRadius: radius.sm, backgroundColor: selected ? colors.surface : 'transparent' },
+              { borderRadius: radius.sm, backgroundColor: selected ? colors.primary : 'transparent' },
               selected && styles.selectedShadow,
             ]}
           >
-            <AppText variant="small" tone={selected ? 'text' : 'muted'} numberOfLines={1}>
+            <AppText variant="small" tone={selected ? 'onPrimary' : 'text'} numberOfLines={2} align="center">
               {o.label}
             </AppText>
           </Pressable>
@@ -48,7 +48,7 @@ export function SegmentedControl<K extends string>({ options, value, onChange, t
 
 const styles = StyleSheet.create({
   track: { flexDirection: 'row', padding: 3 },
-  segment: { flex: 1, paddingVertical: 8, alignItems: 'center', justifyContent: 'center' },
+  segment: { flex: 1, minHeight: 44, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
   selectedShadow: {
     shadowColor: '#000',
     shadowOpacity: 0.08,

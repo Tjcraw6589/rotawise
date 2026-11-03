@@ -42,7 +42,7 @@ export function Stepper({ label, value, display, onChange, step = 1, min = -Infi
       >
         <Ionicons name="remove" size={22} color={colors.text} />
       </Pressable>
-      <AppText variant="bodyBold" style={styles.value} testID={testID ? `${testID}-value` : undefined} accessibilityLiveRegion="polite">
+      <AppText variant="bodyBold" style={styles.value} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} testID={testID ? `${testID}-value` : undefined} accessibilityLiveRegion="polite">
         {display ?? String(value)}
       </AppText>
       <Pressable
@@ -63,5 +63,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   flex: { flex: 1 },
   btn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-  value: { minWidth: 84, textAlign: 'center' },
+  value: { width: 96, textAlign: 'center' },
 });

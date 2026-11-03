@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
@@ -10,6 +11,7 @@ import { Header } from '@/components/Header';
 import { PlatoonBadge } from '@/components/PlatoonBadge';
 import { Row } from '@/components/Row';
 import { Screen } from '@/components/Screen';
+import { Sheet } from '@/components/Sheet';
 import { TextField } from '@/components/TextField';
 import { useProGate } from '@/hooks/useData';
 import type { Profile } from '@/lib/model';
@@ -37,7 +39,7 @@ export default function ProfilesScreen() {
     <Screen scroll testID="profiles-screen">
       <Header title="Rotations" dismiss="back" />
       <AppText variant="body" tone="muted">
-        Keep a second job or a partner&apos;s rotation here. The one marked Showing drives Today, the calendars and the widgets. Turn on Overlay to see another rotation on top of yours in the month view.
+        Keep a second job or a partner&apos;s rotation here. The one showing now drives Today, the calendars and the widgets. Turn on Overlay to see another rotation on top of yours in the month view.
       </AppText>
       {profiles.map((p) => {
         const active = p.id === activeId;
@@ -55,7 +57,14 @@ export default function ProfilesScreen() {
               </View>
               <PlatoonBadge platoon={p.platoon} size={30} />
             </View>
-            <Row title={active ? 'Showing' : 'Show this rotation'} onPress={active ? undefined : () => setActive(p.id)} chevron={false} testID={`profile-show-${p.id}`} />
+            <Row
+              title={active ? 'Showing now' : 'Show this rotation'}
+              subtitle={active ? 'On Today, the calendars and the widgets' : undefined}
+              right={active ? <Ionicons name="checkmark-circle" size={22} color={colors.success} /> : undefined}
+              onPress={active ? undefined : () => setActive(p.id)}
+              chevron={false}
+              testID={`profile-show-${p.id}`}
+            />
             {!active ? <Row title="Overlay on my calendar" toggle={{ value: overlayIds.includes(p.id), onValueChange: () => toggleOverlay(p.id) }} testID={`profile-overlay-${p.id}`} /> : null}
             <Row title="Edit rotation" onPress={() => router.push({ pathname: '/rotation', params: { profileId: p.id } })} testID={`profile-edit-${p.id}`} />
             <Row
@@ -80,34 +89,45 @@ export default function ProfilesScreen() {
         testID="profiles-add"
       />
 
-      {editing ? (
-        <Card style={{ marginTop: spacing.lg }} testID="profile-editor">
-          <TextField label="Name" value={name} onChangeText={setName} maxLength={30} testID="profile-name" />
-          <View style={styles.colors}>
-            {PROFILE_COLORS.map((c) => (
-              <Button
-                key={c}
-                label={c === editing.color ? 'Chosen' : ' '}
-                size="sm"
-                variant="secondary"
-                onPress={() => setEditing({ ...editing, color: c })}
-                style={{ backgroundColor: c, borderColor: c === editing.color ? colors.text : c, minWidth: 64 }}
-              />
-            ))}
+      <Sheet visible={editing !== null} onClose={() => setEditing(null)} title="Rename or recolor" testID="profile-editor">
+        {editing ? (
+          <View style={{ paddingHorizontal: spacing.lg }}>
+            <TextField label="Name" value={name} onChangeText={setName} maxLength={30} testID="profile-name" />
+            <AppText variant="small" tone="muted" style={{ marginBottom: spacing.sm }}>
+              Overlay color
+            </AppText>
+            <View style={styles.colors}>
+              {PROFILE_COLORS.map((c, i) => {
+                const chosen = c === editing.color;
+                return (
+                  <Pressable
+                    key={c}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: chosen }}
+                    accessibilityLabel={`Color ${i + 1}${chosen ? ', chosen' : ''}`}
+                    onPress={() => setEditing({ ...editing, color: c })}
+                    testID={`profile-color-${i}`}
+                    style={[styles.swatchPick, { backgroundColor: c, borderColor: chosen ? colors.text : 'transparent' }]}
+                  >
+                    {chosen ? <Ionicons name="checkmark" size={24} color="#FFFFFF" /> : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Button
+              label="Save"
+              fullWidth
+              onPress={() => {
+                updateProfile(editing.id, { name: name.trim() || editing.name, color: editing.color });
+                setEditing(null);
+              }}
+              style={{ marginTop: spacing.lg }}
+              testID="profile-save"
+            />
+            {profiles.length > 1 ? <Button label="Delete this rotation" variant="danger" fullWidth onPress={() => setConfirm(true)} style={{ marginTop: spacing.sm }} testID="profile-delete" /> : null}
           </View>
-          <Button
-            label="Save"
-            fullWidth
-            onPress={() => {
-              updateProfile(editing.id, { name: name.trim() || editing.name, color: editing.color });
-              setEditing(null);
-            }}
-            style={{ marginTop: spacing.md }}
-            testID="profile-save"
-          />
-          {profiles.length > 1 ? <Button label="Delete this rotation" variant="danger" fullWidth onPress={() => setConfirm(true)} style={{ marginTop: spacing.sm }} testID="profile-delete" /> : null}
-        </Card>
-      ) : null}
+        ) : null}
+      </Sheet>
       <ConfirmSheet
         visible={confirm}
         title="Delete this rotation?"
@@ -130,5 +150,6 @@ const styles = StyleSheet.create({
   swatch: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   swatchText: { color: '#FFFFFF', fontWeight: '900' },
   flex: { flex: 1 },
-  colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  swatchPick: { width: 48, height: 48, borderRadius: 24, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
 });

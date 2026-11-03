@@ -151,8 +151,8 @@ export function RotationSetup({ value, onChange, hour12 }: RotationSetupProps) {
       <SectionHeader title="3. A day you started a run of shifts" />
       <DateField label="Date" value={value.workedDate} onChange={(d) => set({ workedDate: d })} helper={workedDateHelp(value.presetId)} testID="worked-date" />
       <View style={styles.rowButtons}>
-        <Button label="One day earlier" size="sm" variant="secondary" onPress={() => set({ workedDate: addDays(value.workedDate, -1) })} testID="shift-earlier" />
-        <Button label="One day later" size="sm" variant="secondary" onPress={() => set({ workedDate: addDays(value.workedDate, 1) })} testID="shift-later" />
+        <Button label="One day earlier" variant="secondary" onPress={() => set({ workedDate: addDays(value.workedDate, -1) })} style={styles.half} testID="shift-earlier" />
+        <Button label="One day later" variant="secondary" onPress={() => set({ workedDate: addDays(value.workedDate, 1) })} style={styles.half} testID="shift-later" />
       </View>
 
       <SectionHeader title="Your next two weeks" />
@@ -178,7 +178,7 @@ export function RotationSetup({ value, onChange, hour12 }: RotationSetupProps) {
       <SectionHeader title="Kelly days" />
       <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, borderColor: colors.border, borderWidth: StyleSheet.hairlineWidth }}>
         <Row
-          title="Kelly days"
+          title="Use Kelly days"
           subtitle="An extra day off every few shifts"
           toggle={{ value: value.kellyEnabled, onValueChange: (v) => set({ kellyEnabled: v }) }}
           last
@@ -223,6 +223,7 @@ const styles = StyleSheet.create({
   chip: { width: 48, height: 52, alignItems: 'center', justifyContent: 'center' },
   kellyChip: { paddingHorizontal: 12, height: 44, alignItems: 'center', justifyContent: 'center' },
   rowButtons: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 8 },
+  half: { flex: 1, alignSelf: 'stretch', paddingHorizontal: 8 },
   platoonRow: { flexDirection: 'row', gap: 10 },
   platoon: { flex: 1, height: 72, alignItems: 'center', justifyContent: 'center' },
   platoonLetter: { fontSize: 30, fontWeight: '900', lineHeight: 34 },

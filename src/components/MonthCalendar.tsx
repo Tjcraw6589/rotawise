@@ -168,6 +168,12 @@ export function MonthCalendar({ year, month, profile, overrides, showAll, overla
             </AppText>
           </View>
         ))}
+        <View style={styles.legendItem}>
+          <View style={[styles.tail, { backgroundColor: pc.fill }]} />
+          <AppText variant="caption" tone="muted">
+            your tour ends that morning
+          </AppText>
+        </View>
         <AppText variant="caption" tone="muted">
           K Kelly, T traded away, T+ trade shift, OT overtime, V vacation, S sick
         </AppText>

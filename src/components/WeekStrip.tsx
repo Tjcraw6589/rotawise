@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import type { Profile } from '@/lib/model';
 import type { Override } from '@/lib/rotation';
-import { WEEKDAY_SHORT, summarizeDays, weekday } from '@/lib/rotation';
+import { WEEKDAY_SHORT, localISO, summarizeDays, weekday } from '@/lib/rotation';
 import { dayCellLabel } from '@/lib/widgetSnapshot';
 import { PLATOON_COLORS } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
@@ -14,18 +14,20 @@ interface WeekStripProps {
   overrides: readonly Override[];
   from: string;
   days?: number;
+  /** Highlighted with a border; defaults to the device's date. */
+  today?: string;
 }
 
 const CODE_NAMES: Record<string, string> = { K: 'Kelly day', T: 'traded away', V: 'vacation', S: 'sick', L: 'leave', OT: 'extra shift', 'T+': 'trade shift' };
 
 /** The next days as tall, tappable sized columns with the platoon letter on work days. */
-export function WeekStrip({ profile, overrides, from, days = 7 }: WeekStripProps) {
+export function WeekStrip({ profile, overrides, from, days = 7, today = localISO() }: WeekStripProps) {
   const { colors, radius, spacing } = useTheme();
   const list = summarizeDays(profile.rotation, profile.platoon, from, days, overrides);
   const pc = PLATOON_COLORS[profile.platoon];
   return (
     <View style={styles.row} testID="week-strip">
-      {list.map((d, i) => {
+      {list.map((d) => {
         const label = d.on || d.code ? dayCellLabel(profile.platoon, d.on, d.code) : 'Off';
         return (
           <View
@@ -37,8 +39,8 @@ export function WeekStrip({ profile, overrides, from, days = 7 }: WeekStripProps
               {
                 borderRadius: radius.md,
                 backgroundColor: d.on ? pc.fill : colors.surface,
-                borderColor: i === 0 ? colors.text : colors.border,
-                borderWidth: i === 0 ? 2 : StyleSheet.hairlineWidth,
+                borderColor: d.date === today ? colors.text : colors.border,
+                borderWidth: d.date === today ? 2 : StyleSheet.hairlineWidth,
                 paddingVertical: spacing.sm,
               },
             ]}

@@ -4,6 +4,7 @@ import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
 import { ConfirmSheet } from '@/components/ConfirmSheet';
 import { DateField } from '@/components/DateField';
 import { Header } from '@/components/Header';
@@ -172,9 +173,9 @@ export default function EntryScreen() {
       ) : null}
 
       {kind === 'trade' ? (
-        <View style={{ marginBottom: spacing.lg }}>
+        <Card padded={false} style={{ marginBottom: spacing.lg }}>
           <Row title="Paid back" subtitle="Turn on when the favor has been returned" toggle={{ value: settled, onValueChange: setSettled }} last testID="entry-settled" />
-        </View>
+        </Card>
       ) : null}
 
       <TextField label="Note" placeholder="Optional" value={note} onChangeText={setNote} maxLength={200} testID="entry-note" />

@@ -24,7 +24,7 @@ const HEADLINES: Record<string, { title: string; body: string }> = {
   print: { title: 'Print the whole year', body: 'A one page year calendar as a PDF or an image, ready for the fridge or the station.' },
   themes: { title: 'Make it yours', body: 'Choose a color theme for the app.' },
   widgets: { title: 'Widgets your way', body: 'Pick the widget background: light, dark or your platoon color.' },
-  general: { title: 'Rotawise Pro', body: 'Pay once. Yours forever. Never a subscription.' },
+  general: { title: 'Rotawise Pro', body: 'Every Pro tool, yours forever.' },
 };
 
 const FEATURES: { icon: keyof typeof Ionicons.glyphMap; title: string; body: string }[] = [

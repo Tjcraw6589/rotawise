@@ -89,7 +89,12 @@ export async function exportShiftsToCalendar(args: {
   const today = localISO();
   const from = addDays(today, -1);
   const to = addMonths(today, args.monthsAhead);
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let timeZone = 'UTC';
+  try {
+    timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    // Fallback handled in shiftEvents.
+  }
   const events = shiftEvents(args.profile, args.overrides, from, to, timeZone);
   const eventIds: string[] = [];
   for (const e of events) {

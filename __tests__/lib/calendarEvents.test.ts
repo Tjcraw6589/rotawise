@@ -47,3 +47,21 @@ describe('formatting', () => {
     expect(parseAmount('abc')).toBeNull();
   });
 });
+
+describe('calendar export without Intl time zones', () => {
+  it('falls back to the device clock instead of crashing', () => {
+    const real = Intl.DateTimeFormat;
+    const profile = { ...defaultProfile('2027-03-01'), rotation: rotationFromPreset('24-48', '2027-03-01', null), platoon: 'A' as const };
+    try {
+      (Intl as { DateTimeFormat: unknown }).DateTimeFormat = function broken() {
+        throw new RangeError('timeZone not supported');
+      };
+      const events = shiftEvents(profile, [], '2027-03-01', '2027-03-04', 'Pacific/Chatham');
+      expect(events).toHaveLength(2);
+      expect(events[0]!.start.getHours()).toBe(7);
+      expect(events[0]!.end.getDate()).toBe(2);
+    } finally {
+      (Intl as { DateTimeFormat: unknown }).DateTimeFormat = real;
+    }
+  });
+});

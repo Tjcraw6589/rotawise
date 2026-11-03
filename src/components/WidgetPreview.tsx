@@ -67,8 +67,8 @@ export function WidgetPreview({ snapshot, date, minutes, background, dark }: Wid
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
-  small: { width: 158, height: 158, borderRadius: 22, padding: 14, justifyContent: 'space-between' },
-  medium: { width: 338, maxWidth: '100%', height: 158, borderRadius: 22, padding: 14, justifyContent: 'space-between' },
+  small: { width: 158, height: 158, borderRadius: 22, padding: 14, justifyContent: 'space-between', borderWidth: 1, borderColor: '#8A96A355' },
+  medium: { width: 338, maxWidth: '100%', height: 158, borderRadius: 22, padding: 14, justifyContent: 'space-between', borderWidth: 1, borderColor: '#8A96A355' },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   chip: { borderRadius: 7, paddingHorizontal: 8, paddingVertical: 1 },
   chipText: { fontSize: 13, fontWeight: '900' },
