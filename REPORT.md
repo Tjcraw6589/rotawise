@@ -36,6 +36,22 @@ of git. The only change after commit 206fd60 is the JavaScript tablet layout (co
 A simulator build cannot be installed on an iPhone. The TestFlight build needs your one time
 Apple sign in (RELEASE_STEPS.md step 1).
 
+## QA pass (2 Nov 2026)
+
+Every screen was driven in the browser at 375 by 812 and 360 by 640, light and dark, as Pro and free.
+Found and fixed:
+
+- Selected options in segmented controls were nearly invisible in dark mode, and the controls were short tap targets. They are now filled with the primary color, 44 points tall, and labels wrap instead of being cut off.
+- The two week preview outlined the first day of the second week as if it were today. Regression test added.
+- Setup's One day earlier and One day later buttons were small. They are now full size.
+- Pay showed "6 days after" crammed between buttons. It now reads "Paid after period ends: 6 days" and explains which straight time number to use.
+- The Paid back switch sat outside a card; the profile color picker was plain buttons labeled Chosen. That is now round swatches with a check in a sheet.
+- The month view's end of tour bar is now in the legend; the widget previews have visible edges in dark mode.
+- Calendar export now falls back to the device clock if the phone's JavaScript engine lacks named time zones, instead of crashing. Tested with a zone that forces the fallback.
+- The Pro screen said "Never a subscription" twice in a row.
+
+Gate after the pass: tsc (app and site), eslint, 183 Jest tests, 3 Playwright tests, all passing.
+
 ## Not tested, and why
 
 - **Widgets on a device.** There is no Mac, iOS simulator or Android emulator here. The brief
