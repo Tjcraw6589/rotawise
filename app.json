@@ -13,7 +13,7 @@
     "ios": {
       "bundleIdentifier": "com.tyjcraw.rotawise",
       "supportsTablet": true,
-      "appleTeamId": "JA88SJ7PGW",
+      "appleTeamId": "JA885J7PGW",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCalendarsFullAccessUsageDescription": "Rotawise adds your shifts to a calendar you choose so a partner can see them through a shared calendar. Nothing is read back or sent anywhere.",
