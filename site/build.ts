@@ -30,6 +30,8 @@ const config = JSON.parse(readFileSync(join(here, 'config.json'), 'utf8')) as {
 };
 const YEAR = config.year;
 const SITE = config.siteUrl.endsWith('/') ? config.siteUrl : `${config.siteUrl}/`;
+/** App Store ID of "Shift Calendar: Rotawise"; used for Safari's app banner once the app is live (config appStoreUrl set). */
+const APP_STORE_ID = '6829975398';
 
 type Preset = Exclude<PresetId, 'custom'>;
 const TEMPLATE_PRESETS = PRESETS.filter((p) => p.id !== 'custom').map((p) => p.id as Preset);
@@ -68,6 +70,8 @@ h2{font-size:28px;margin:0 0 12px}
 table.compare{width:100%;border-collapse:collapse;background:var(--surface);border-radius:16px;overflow:hidden}
 table.compare th,table.compare td{border-bottom:1px solid var(--border);padding:10px 12px;text-align:left}
 .banner{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:14px 16px;font-weight:600;margin:16px 0}
+.crumbs{margin:20px 0 0;font-size:15px;color:var(--muted)}
+.crumbs a{color:inherit}
 .badges{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
 .lgb{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:7px;font-weight:900;padding:0 6px}
 .cal{background:#fff;color:#0E1621;border-radius:16px;padding:16px;margin:18px 0;border:1px solid var(--border);overflow-x:auto}
@@ -85,6 +89,38 @@ interface PageArgs {
   description: string;
   body: string;
   noindex?: boolean;
+  /** Schema.org structured data, written as JSON-LD in the head. */
+  jsonLd?: object[];
+}
+
+/** Search results cut titles after about 60 characters and descriptions after about 160. */
+const TITLE_MAX = 60;
+const DESCRIPTION_MAX = 160;
+
+/** Title case for preset names in titles and headings: "Kelly schedule" becomes "Kelly Schedule"; "4 on 4 off" stays. */
+function headingName(name: string): string {
+  return name
+    .split(' ')
+    .map((w) => (w === 'on' || w === 'off' ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
+}
+
+/** The first description that fits in a search result. */
+function fitDescription(...candidates: string[]): string {
+  return candidates.find((c) => c.length <= DESCRIPTION_MAX) ?? candidates[candidates.length - 1]!;
+}
+
+function jsonLdTag(data: object): string {
+  // A "<" inside JSON could close the script tag early, so it is written as its unicode escape.
+  return `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, String.fromCharCode(92) + 'u003c')}</script>`;
+}
+
+function breadcrumbs(items: [string, string][]): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map(([name, item], i) => ({ '@type': 'ListItem', position: i + 1, name, item })),
+  };
 }
 
 const pages: { path: string; noindex: boolean }[] = [];
@@ -104,7 +140,10 @@ function storeButtons(): string {
   return `<div class="stores">${ios}${android}</div>`;
 }
 
-function page({ path, title, description, body, noindex }: PageArgs): void {
+function page({ path, title, description, body, noindex, jsonLd = [] }: PageArgs): void {
+  if (!noindex && (title.length > TITLE_MAX || description.length > DESCRIPTION_MAX)) {
+    throw new Error(`${path}: title ${title.length}/${TITLE_MAX} or description ${description.length}/${DESCRIPTION_MAX} characters is too long for search results`);
+  }
   const r = rel(path);
   const canonical = SITE + path.replace(/index\.html$/, '');
   const html = `<!doctype html>
@@ -119,6 +158,11 @@ ${noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" hr
 <meta property="og:description" content="${escapeHtml(description)}">
 <meta property="og:type" content="website">
 <meta property="og:image" content="${SITE}static/icon-512.png">
+<meta property="og:site_name" content="Rotawise">
+${noindex ? '' : `<meta property="og:url" content="${escapeHtml(canonical)}">`}
+<meta name="twitter:card" content="summary">
+${config.appStoreUrl ? `<meta name="apple-itunes-app" content="app-id=${APP_STORE_ID}">` : ''}
+${jsonLd.map(jsonLdTag).join('\n')}
 <link rel="icon" href="${r}static/favicon.png">
 <link rel="stylesheet" href="${r}styles.css">
 </head>
@@ -154,7 +198,7 @@ function calendarsFor(rotation: Rotation, title: string, footer: string): string
   const per = PLATOONS.slice(0, rotation.platoonCount)
     .map(
       (p: Platoon) =>
-        `<h2 id="platoon-${p.toLowerCase()}">${p} platoon ${YEAR}</h2><div class="cal">${yearCalendarBlock({ year: YEAR, rotation, platoons: [p], title: `${title}: ${p} platoon, ${YEAR}`, footer })}</div>`,
+        `<div class="cal" id="platoon-${p.toLowerCase()}">${yearCalendarBlock({ year: YEAR, rotation, platoons: [p], title: `${title}: ${p} platoon, ${YEAR}`, footer })}</div>`,
     )
     .join('');
   const jump = PLATOONS.slice(0, rotation.platoonCount)
@@ -179,12 +223,24 @@ for (const id of TEMPLATE_PRESETS) {
   const rotation = rotationFromPreset(id, `${YEAR}-01-01`);
   const letters = platoonLetters(rotation.platoonCount);
   const kellyNote = rotation.kelly ? ` Kelly days are shown every ${rotation.kelly.everyNthShift}th tour; departments differ, so set your own interval in the app.` : '';
+  const name = headingName(info.name);
   page({
     path: `rotations/${id}/index.html`,
-    title: `${info.name} Shift Calendar ${YEAR}: ${letters} Platoon Printable Calendar`,
-    description: `${info.name} shift calendar for ${YEAR} with a printable calendar for each platoon (${letters}). ${info.tagline}. Free in the Rotawise app, offline, no account.`,
-    body: `<div class="hero"><h1>${escapeHtml(info.name)} Shift Calendar ${YEAR}</h1>
-<p class="lead">${escapeHtml(info.description)} Used by ${escapeHtml(info.usedBy.toLowerCase())}. About ${info.hoursPerWeekAverage} hours a week on average.</p>
+    title: `${name} Shift Calendar ${YEAR} (Printable, ${letters})`,
+    description: fitDescription(
+      `Printable ${info.name} shift calendar for ${YEAR}, one for each platoon (${letters}). ${info.tagline}. Free in the Rotawise app, offline, no account.`,
+      `Printable ${info.name} shift calendar for ${YEAR}, one for each platoon (${letters}). ${info.tagline}.`,
+      `Printable ${info.name} shift calendar for ${YEAR}, one for each platoon (${letters}).`,
+    ),
+    jsonLd: [
+      breadcrumbs([
+        ['Rotawise', SITE],
+        [`${name} Shift Calendar ${YEAR}`, `${SITE}rotations/${id}/`],
+      ]),
+    ],
+    body: `<nav class="crumbs no-print" aria-label="Breadcrumb"><a href="../../">Home</a> › <a href="../../#rotations">Rotations</a> › ${escapeHtml(name)}</nav>
+<div class="hero"><h1>${escapeHtml(name)} Shift Calendar ${YEAR}</h1>
+<p class="lead">${escapeHtml(info.description)} Used by ${escapeHtml(info.usedBy.charAt(0).toLowerCase() + info.usedBy.slice(1))}. About ${info.hoursPerWeekAverage} hours a week on average.</p>
 ${legend(rotation.platoonCount)}
 <p class="banner">Template: platoon A starts its cycle on January 1, ${YEAR}. Your department's start date is probably different.${escapeHtml(kellyNote)} The Rotawise app lines it up with your real dates in a few taps.</p>
 ${storeButtons()}</div>
@@ -275,7 +331,21 @@ const departmentCards = departments
 page({
   path: 'index.html',
   title: 'Rotawise: Shift Calendar for Firefighters, EMS and Police',
-  description: 'Shift calendar for firefighters, EMS and police. 24/48, 48/96, Kelly, Pitman, DuPont and custom rotations with A B C platoons. Home screen widgets. Pay once, never a subscription.',
+  description: 'Shift calendar app for firefighters, EMS and police: 24/48, 48/96, Kelly, Pitman, DuPont and custom rotations, with home screen widgets. Pay once, no renewals.',
+  jsonLd: [
+    { '@context': 'https://schema.org', '@type': 'WebSite', name: 'Rotawise', url: SITE },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'MobileApplication',
+      name: 'Rotawise',
+      alternateName: 'Shift Calendar: Rotawise',
+      description: 'Shift calendar for firefighters, EMS, police and rotating shift workers, with home screen widgets. Works offline with no account.',
+      operatingSystem: 'iOS',
+      applicationCategory: 'UtilitiesApplication',
+      url: SITE,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
+  ],
   body: `<div class="hero">
 <span class="promise">Pay once. Never a subscription.</span>
 <h1>Your rotation, on your home screen.</h1>
