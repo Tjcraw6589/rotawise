@@ -45,13 +45,14 @@ export function WeekStrip({ profile, overrides, from, days = 7, today = localISO
               },
             ]}
           >
-            <AppText variant="small" style={{ color: d.on ? pc.text : colors.textMuted }}>
+            {/* Seven cells share one row, so their text grows only a little with the text size setting. */}
+            <AppText variant="small" maxFontSizeMultiplier={1.3} style={{ color: d.on ? pc.text : colors.textMuted }}>
               {WEEKDAY_SHORT[weekday(d.date)]}
             </AppText>
-            <AppText variant="bodyBold" style={{ color: d.on ? pc.text : colors.text }}>
+            <AppText variant="bodyBold" maxFontSizeMultiplier={1.3} style={{ color: d.on ? pc.text : colors.text }}>
               {Number(d.date.slice(8))}
             </AppText>
-            <AppText variant="small" style={{ color: d.on ? pc.text : colors.textMuted, fontWeight: '800' }} numberOfLines={1}>
+            <AppText variant="small" maxFontSizeMultiplier={1.3} style={{ color: d.on ? pc.text : colors.textMuted, fontWeight: '800' }} numberOfLines={1}>
               {label}
             </AppText>
           </View>

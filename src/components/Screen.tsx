@@ -32,6 +32,7 @@ export function Screen({
   const padding = padded ? { paddingHorizontal: spacing.lg } : undefined;
   const body = scroll ? (
     <ScrollView
+      testID={testID ? `${testID}-scroll` : undefined}
       style={styles.flex}
       contentContainerStyle={[padding, styles.column, { paddingBottom: spacing.xxl }, contentStyle]}
       keyboardShouldPersistTaps="handled"

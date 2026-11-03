@@ -16,6 +16,7 @@ interface HeaderProps {
   large?: boolean;
 }
 
+/** Screen title. It wraps at large text sizes instead of being cut off. */
 export function Header({ title, dismiss, onDismiss, right, large = false }: HeaderProps) {
   const { colors, spacing } = useTheme();
   const router = useRouter();
@@ -38,7 +39,7 @@ export function Header({ title, dismiss, onDismiss, right, large = false }: Head
           <Ionicons name={dismiss === 'back' ? 'chevron-back' : 'close'} size={26} color={colors.text} />
         </Pressable>
       ) : null}
-      <AppText variant={large ? 'title' : 'h2'} style={styles.title} numberOfLines={1}>
+      <AppText variant={large ? 'title' : 'h2'} style={styles.title} accessibilityRole={title ? 'header' : undefined}>
         {title}
       </AppText>
       {right}

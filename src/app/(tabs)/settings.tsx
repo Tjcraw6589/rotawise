@@ -20,7 +20,7 @@ import type { PaletteId } from '@/lib/model';
 import { PLATOONS, presetInfo } from '@/lib/rotation';
 import type { Platoon } from '@/lib/rotation';
 import { successHaptic } from '@/services/haptics';
-import { restorePro, usePurchasesStatus } from '@/services/purchases';
+import { restorePro, storeAccountName, usePurchasesStatus } from '@/services/purchases';
 import { useStore } from '@/store/useStore';
 import { PALETTES } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
@@ -38,18 +38,23 @@ export default function SettingsScreen() {
   const storeStatus = usePurchasesStatus();
   const [sheet, setSheet] = useState<null | 'platoon' | 'palette' | 'erase'>(null);
   const [message, setMessage] = useState<{ tone: 'success' | 'info' | 'warning'; text: string } | null>(null);
+  const [restoring, setRestoring] = useState(false);
   const rotationName = profile.rotation.presetId === 'custom' ? 'Custom pattern' : presetInfo(profile.rotation.presetId).name;
 
   const restore = async () => {
+    if (restoring) return;
+    setRestoring(true);
     const outcome = await restorePro();
+    setRestoring(false);
     if (outcome === 'restored') {
       setPro(true);
       successHaptic();
       setMessage({ tone: 'success', text: 'Pro restored. Thank you!' });
     } else if (outcome === 'none') {
-      setMessage({ tone: 'info', text: 'No earlier Pro purchase was found for this store account.' });
+      const account = storeAccountName();
+      setMessage({ tone: 'info', text: `No Pro purchase was found for this ${account}. Make sure this device uses the ${account} you bought Pro with, then try again.` });
     } else {
-      setMessage({ tone: 'warning', text: storeStatus === 'unavailable' ? 'Purchases work in the iPhone and Android apps.' : 'The store could not be reached. Try again later.' });
+      setMessage({ tone: 'warning', text: storeStatus === 'unavailable' ? 'Purchases work in the iPhone and Android apps.' : 'The store could not be reached. Check your connection and try again.' });
     }
   };
 
@@ -58,7 +63,7 @@ export default function SettingsScreen() {
       <Header title="Settings" large />
       {message ? <Notice tone={message.tone} message={message.text} testID="settings-message" /> : null}
 
-      <SectionHeader title="Rotation" first />
+      <SectionHeader title="Rotation" first inset />
       <Card padded={false}>
         <Row title="Schedule" value={rotationName} onPress={() => router.push('/rotation')} testID="settings-rotation" />
         <Row title="My platoon" right={<PlatoonBadge platoon={profile.platoon} size={28} />} onPress={() => setSheet('platoon')} testID="settings-platoon" />
@@ -71,7 +76,7 @@ export default function SettingsScreen() {
         />
       </Card>
 
-      <SectionHeader title="Display" />
+      <SectionHeader title="Display" inset />
       <Card>
         <AppText variant="small" tone="muted" style={{ marginBottom: spacing.xs }}>
           Appearance
@@ -113,7 +118,7 @@ export default function SettingsScreen() {
         <Row title="Widgets" subtitle="How to add them, and their colors" onPress={() => router.push('/widgets')} last testID="settings-widgets" />
       </Card>
 
-      <SectionHeader title="Rotawise Pro" />
+      <SectionHeader title="Rotawise Pro" inset />
       <Card padded={false}>
         <Row
           title={isPro ? 'Pro is unlocked' : 'Get Pro'}
@@ -122,10 +127,10 @@ export default function SettingsScreen() {
           onPress={() => router.push({ pathname: '/pro', params: { reason: 'general' } })}
           testID="settings-pro"
         />
-        <Row title="Restore purchases" onPress={() => void restore()} last testID="settings-restore" />
+        <Row title="Restore purchases" value={restoring ? 'Checking…' : undefined} onPress={() => void restore()} last testID="settings-restore" />
       </Card>
 
-      <SectionHeader title="About" />
+      <SectionHeader title="About" inset />
       <Card padded={false}>
         <Row title="Privacy" subtitle="Your schedule stays on this phone. No account, ads or tracking." onPress={() => router.push({ pathname: '/about', params: { doc: 'privacy' } })} testID="settings-privacy" />
         <Row title="Help and support" onPress={() => router.push({ pathname: '/about', params: { doc: 'support' } })} testID="settings-support" />
@@ -160,7 +165,7 @@ export default function SettingsScreen() {
       <ConfirmSheet
         visible={sheet === 'erase'}
         title="Erase all data?"
-        message="Your rotations, trades, overtime and leave will be deleted from this phone. Pro stays unlocked."
+        message="Your rotations, trades, overtime and leave will be deleted from this phone. This cannot be undone. Pro stays unlocked."
         confirmLabel="Erase everything"
         destructive
         onConfirm={() => {

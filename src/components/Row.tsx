@@ -34,11 +34,11 @@ export function Row({ title, subtitle, value, left, right, onPress, chevron, des
     >
       {left ? <View style={{ marginRight: spacing.md }}>{left}</View> : null}
       <View style={styles.flex}>
-        <AppText variant="body" tone={destructive ? 'danger' : 'text'} numberOfLines={1}>
+        <AppText variant="body" tone={destructive ? 'danger' : 'text'}>
           {title}
         </AppText>
         {subtitle ? (
-          <AppText variant="caption" tone="muted" numberOfLines={2}>
+          <AppText variant="caption" tone="muted">
             {subtitle}
           </AppText>
         ) : null}
@@ -54,7 +54,9 @@ export function Row({ title, subtitle, value, left, right, onPress, chevron, des
           value={toggle.value}
           onValueChange={toggle.onValueChange}
           disabled={toggle.disabled}
-          trackColor={{ true: colors.primary, false: colors.border }}
+          // The off track uses a darker gray so the switch stays visible in sunlight (3:1 or better).
+          trackColor={{ true: colors.primary, false: colors.textFaint }}
+          ios_backgroundColor={colors.textFaint}
           thumbColor="#FFFFFF"
           accessibilityLabel={title}
           testID={testID ? `${testID}-switch` : undefined}

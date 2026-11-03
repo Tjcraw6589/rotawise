@@ -4,7 +4,7 @@ import type { WidgetBackground } from '@/lib/model';
 import type { WidgetSnapshot } from '@/lib/widgetSnapshot';
 import { dayCellLabel, widgetColors, widgetView } from '@/lib/widgetSnapshot';
 
-import { AppText } from './AppText';
+import { AppText, type AppTextProps } from './AppText';
 
 interface WidgetPreviewProps {
   snapshot: WidgetSnapshot;
@@ -14,48 +14,58 @@ interface WidgetPreviewProps {
   dark: boolean;
 }
 
+/** The preview is a fixed size drawing of a widget, so its text grows only a little with the text size setting. */
+function T(props: AppTextProps) {
+  return <AppText maxFontSizeMultiplier={1.2} {...props} />;
+}
+
 /**
  * An in app drawing of the two home screen widgets, built from the same snapshot and
  * rules the real widgets use. It is a preview: the real widgets are native views.
+ * VoiceOver reads each widget as one summary instead of a dozen fragments.
  */
 export function WidgetPreview({ snapshot, date, minutes, background, dark }: WidgetPreviewProps) {
   const view = widgetView(snapshot, date, minutes);
   const p = widgetColors(background, dark, snapshot.fill, snapshot.text);
   const onColor = background === 'platoon' ? p.foreground : dark || background === 'dark' ? '#5BD38A' : '#0F7A3F';
+  const platoon = view.platoon ? `, platoon ${view.platoon}` : '';
+  const smallLabel = `Today widget preview: ${view.dateLabel}, ${view.status}${platoon}. ${view.detail}`;
+  const weekLabel = view.week.map((d) => `${d.weekday} ${d.dayOfMonth} ${d.on ? 'on' : 'off'}`).join(', ');
+  const mediumLabel = `Next 7 days widget preview: today ${view.status}. ${view.detail}. ${weekLabel}`;
   const chip = (
     <View style={[styles.chip, { backgroundColor: view.fill }]}>
-      <AppText style={[styles.chipText, { color: view.text }]}>{view.platoon}</AppText>
+      <T style={[styles.chipText, { color: view.text }]}>{view.platoon}</T>
     </View>
   );
   return (
     <View style={styles.row} testID="widget-preview">
-      <View style={[styles.small, { backgroundColor: p.background }]} testID="widget-preview-small">
+      <View style={[styles.small, { backgroundColor: p.background }]} accessible accessibilityLabel={smallLabel} testID="widget-preview-small">
         <View style={styles.top}>
-          <AppText style={{ color: p.muted, fontSize: 12 }}>{view.dateLabel}</AppText>
+          <T style={{ color: p.muted, fontSize: 12 }}>{view.dateLabel}</T>
           {chip}
         </View>
-        <AppText style={{ color: view.on ? onColor : p.foreground, fontSize: 38, fontWeight: '900' }}>{view.status}</AppText>
-        <AppText style={{ color: p.foreground, fontSize: 12 }} numberOfLines={2}>
+        <T style={{ color: view.on ? onColor : p.foreground, fontSize: 38, fontWeight: '900' }}>{view.status}</T>
+        <T style={{ color: p.foreground, fontSize: 12 }} numberOfLines={2}>
           {view.detail}
-        </AppText>
+        </T>
       </View>
-      <View style={[styles.medium, { backgroundColor: p.background }]} testID="widget-preview-medium">
+      <View style={[styles.medium, { backgroundColor: p.background }]} accessible accessibilityLabel={mediumLabel} testID="widget-preview-medium">
         <View style={styles.top}>
-          <AppText style={{ color: view.on ? onColor : p.foreground, fontSize: 16, fontWeight: '800' }}>Today: {view.status}</AppText>
+          <T style={{ color: view.on ? onColor : p.foreground, fontSize: 16, fontWeight: '800' }}>Today: {view.status}</T>
           {chip}
         </View>
-        <AppText style={{ color: p.muted, fontSize: 11 }} numberOfLines={1}>
+        <T style={{ color: p.muted, fontSize: 11 }} numberOfLines={1}>
           {view.detail}
-        </AppText>
+        </T>
         <View style={styles.week}>
           {view.week.map((d) => (
             <View key={d.date} style={styles.cell}>
-              <AppText style={{ color: p.muted, fontSize: 10, fontWeight: d.isToday ? '800' : '400' }}>{d.weekday.slice(0, 2)}</AppText>
-              <AppText style={{ color: p.foreground, fontSize: 12, fontWeight: d.isToday ? '800' : '400' }}>{d.dayOfMonth}</AppText>
+              <T style={{ color: p.muted, fontSize: 10, fontWeight: d.isToday ? '800' : '400' }}>{d.weekday.slice(0, 2)}</T>
+              <T style={{ color: p.foreground, fontSize: 12, fontWeight: d.isToday ? '800' : '400' }}>{d.dayOfMonth}</T>
               <View style={[styles.pill, { backgroundColor: d.on ? view.fill : p.chipOff }]}>
-                <AppText style={{ color: d.on ? view.text : p.muted, fontSize: 10, fontWeight: '800' }} numberOfLines={1}>
+                <T style={{ color: d.on ? view.text : p.muted, fontSize: 10, fontWeight: '800' }} numberOfLines={1}>
                   {dayCellLabel(view.platoon, d.on, d.code)}
-                </AppText>
+                </T>
               </View>
             </View>
           ))}

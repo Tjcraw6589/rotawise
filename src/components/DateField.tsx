@@ -83,7 +83,7 @@ function MonthPicker({ value, onPick, testID }: { value: string; onPick: (iso: s
       <View style={styles.grid}>
         {WEEKDAYS.map((w, i) => (
           <View key={`${w}${i}`} style={styles.cell}>
-            <AppText variant="small" tone="faint">
+            <AppText variant="small" tone="muted">
               {w}
             </AppText>
           </View>
@@ -106,7 +106,7 @@ function MonthPicker({ value, onPick, testID }: { value: string; onPick: (iso: s
               style={styles.cell}
             >
               <View style={[styles.day, { borderRadius: radius.pill }, selected && { backgroundColor: colors.primary }, !selected && isToday && { borderWidth: 2, borderColor: colors.primary }]}>
-                <AppText variant="bodyBold" style={{ color: selected ? colors.onPrimary : colors.text }}>
+                <AppText variant="bodyBold" maxFontSizeMultiplier={1.4} style={{ color: selected ? colors.onPrimary : colors.text }}>
                   {Number(d.slice(8))}
                 </AppText>
               </View>

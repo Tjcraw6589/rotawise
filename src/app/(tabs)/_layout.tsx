@@ -26,6 +26,8 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: { backgroundColor: colors.tabBar, borderTopColor: colors.border, height: TAB_BAR_CONTENT_HEIGHT + insets.bottom },
         tabBarLabelStyle: { fontSize: 12, fontWeight: '700', lineHeight: 15 },
+        // Like the native iOS tab bar, labels keep their size at large text settings instead of being cut off.
+        tabBarAllowFontScaling: false,
         sceneStyle: { backgroundColor: colors.background },
       }}
     >

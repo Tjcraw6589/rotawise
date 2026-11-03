@@ -36,7 +36,7 @@ export function SegmentedControl<K extends string>({ options, value, onChange, t
               selected && styles.selectedShadow,
             ]}
           >
-            <AppText variant="small" tone={selected ? 'onPrimary' : 'text'} numberOfLines={2} align="center">
+            <AppText variant="small" tone={selected ? 'onPrimary' : 'text'} numberOfLines={2} align="center" maxFontSizeMultiplier={1.3}>
               {o.label}
             </AppText>
           </Pressable>

@@ -43,7 +43,8 @@ export function Button({
     danger: { bg: colors.dangerSoft, fg: colors.danger, border: colors.dangerSoft },
     pro: { bg: colors.pro, fg: scheme === 'dark' ? '#1A1400' : '#FFFFFF', border: colors.pro },
   }[variant];
-  const height = { sm: 36, md: 48, lg: 56 }[size];
+  // Minimum heights keep every button at least 44 points tall; larger text sizes make it grow instead of clipping.
+  const minHeight = { sm: 44, md: 48, lg: 56 }[size];
   const inactive = disabled || loading;
 
   return (
@@ -60,7 +61,8 @@ export function Button({
       style={({ pressed }) => [
         styles.base,
         {
-          height,
+          minHeight,
+          paddingVertical: spacing.sm,
           borderRadius: radius.md,
           backgroundColor: palette.bg,
           borderColor: palette.border,
@@ -76,7 +78,7 @@ export function Button({
       ) : (
         <View style={styles.row}>
           {icon ? <View style={{ marginRight: spacing.sm }}>{icon}</View> : null}
-          <AppText variant={size === 'sm' ? 'small' : 'bodyBold'} style={{ color: palette.fg }}>
+          <AppText variant={size === 'sm' ? 'small' : 'bodyBold'} align="center" style={{ color: palette.fg, flexShrink: 1 }}>
             {label}
           </AppText>
         </View>

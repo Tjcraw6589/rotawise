@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
@@ -38,6 +38,9 @@ const FEATURES: { icon: keyof typeof Ionicons.glyphMap; title: string; body: str
   { icon: 'color-palette', title: 'Themes and widget colors', body: 'Make the app and widgets yours.' },
 ];
 
+/** iOS text sizes up to AX2 report a font scale below this; AX3 and larger are above it. */
+const PIN_FOOTER_BELOW_FONT_SCALE = 2.2;
+
 export default function ProScreen() {
   const { reason } = useLocalSearchParams<{ reason?: string }>();
   const router = useRouter();
@@ -49,6 +52,9 @@ export default function ProScreen() {
   const [busy, setBusy] = useState<null | 'buy' | 'restore'>(null);
   const [message, setMessage] = useState<{ tone: 'success' | 'warning' | 'info'; text: string } | null>(null);
   const headline = HEADLINES[reason ?? 'general'] ?? HEADLINES.general!;
+  const { fontScale } = useWindowDimensions();
+  // At the largest accessibility text sizes a pinned footer would cover most of the screen, so it scrolls with the page instead.
+  const pinFooter = fontScale < PIN_FOOTER_BELOW_FONT_SCALE;
 
   useEffect(() => {
     let cancelled = false;
@@ -73,7 +79,7 @@ export default function ProScreen() {
     } else if (outcome === 'cancelled') {
       setMessage({ tone: 'info', text: 'No problem. Everything in the free version keeps working.' });
     } else {
-      setMessage({ tone: 'warning', text: 'The purchase could not be completed. You were not charged.' });
+      setMessage({ tone: 'warning', text: 'The purchase did not go through, and you were not charged. Check your connection and try again.' });
     }
   };
 
@@ -86,7 +92,8 @@ export default function ProScreen() {
       successHaptic();
       setMessage({ tone: 'success', text: 'Pro restored. Thank you!' });
     } else if (outcome === 'none') {
-      setMessage({ tone: 'info', text: 'No earlier Pro purchase was found for this store account.' });
+      const account = storeAccountName();
+      setMessage({ tone: 'info', text: `No Pro purchase was found for this ${account}. Make sure this device uses the ${account} you bought Pro with, then try again.` });
     } else {
       setMessage({ tone: 'warning', text: 'The store could not be reached. Check your connection and try again.' });
     }
@@ -101,34 +108,75 @@ export default function ProScreen() {
   const unavailableText = !purchasesSupported
     ? 'Purchases work in the iPhone and Android apps. Everything in the free version works here.'
     : storeStatus === 'loading'
-      ? 'Connecting to the store...'
+      ? 'Connecting to the store…'
       : 'The store is unavailable right now. The free version keeps working; try again later.';
 
+  // The price, the buy button and Restore stay pinned at the bottom, so nobody has to scroll to find them.
+  const footer = (
+    <View style={[styles.footer, { paddingHorizontal: spacing.lg, paddingTop: spacing.md, borderTopColor: colors.border, backgroundColor: colors.background }]}>
+      {message ? (
+        <View style={{ marginBottom: spacing.md }}>
+          <Notice tone={message.tone} message={message.text} testID="pro-message" />
+        </View>
+      ) : null}
+      {isPro ? (
+        <Button label="Done" fullWidth size="lg" onPress={dismiss} testID="pro-done" />
+      ) : (
+        <>
+          {!storeReady ? (
+            <View style={{ marginBottom: spacing.md }}>
+              <Notice tone="info" message={unavailableText} testID="store-unavailable" />
+            </View>
+          ) : null}
+          <Button
+            label={storeReady ? `Unlock Pro for ${offer.priceString}` : 'Unlock Pro'}
+            variant="pro"
+            size="lg"
+            fullWidth
+            disabled={!storeReady || busy === 'restore'}
+            loading={busy === 'buy'}
+            onPress={() => void buy()}
+            testID="pro-buy"
+          />
+          <AppText variant="caption" tone="muted" align="center" style={{ marginTop: spacing.sm }}>
+            Pay once. No subscription, no renewals. Billed by {billingStoreName()}.
+          </AppText>
+          <View style={styles.links}>
+            <Button
+              label="Restore purchases"
+              variant="ghost"
+              disabled={storeStatus !== 'ready' || busy === 'buy'}
+              loading={busy === 'restore'}
+              onPress={() => void restore()}
+              style={styles.link}
+              testID="pro-restore"
+            />
+            <Button label="Not now" variant="ghost" onPress={dismiss} style={styles.link} testID="pro-not-now" />
+          </View>
+        </>
+      )}
+    </View>
+  );
+
   return (
-    <Screen scroll edges={['top', 'bottom']} testID="pro-screen">
+    <Screen scroll edges={['top', 'bottom']} footer={pinFooter ? footer : undefined} testID="pro-screen">
       <Header title="" dismiss="close" />
       <View style={styles.hero}>
         <View style={[styles.badge, { backgroundColor: colors.proSoft, borderRadius: radius.xl }]}>
           <Ionicons name="sparkles" size={44} color={colors.pro} />
         </View>
-        <AppText variant="title" align="center" style={{ marginTop: spacing.lg }}>
+        <AppText variant="title" align="center" accessibilityRole="header" style={{ marginTop: spacing.lg }}>
           {headline.title}
         </AppText>
         <AppText variant="body" tone="muted" align="center" style={{ marginTop: spacing.sm }}>
           {headline.body}
         </AppText>
         <View style={[styles.promise, { backgroundColor: colors.proSoft, borderRadius: radius.pill, marginTop: spacing.md }]}>
-          <AppText variant="bodyBold" style={{ color: colors.pro }} testID="pro-promise">
+          <AppText variant="bodyBold" align="center" style={{ color: colors.pro }} testID="pro-promise">
             One time purchase. Never a subscription.
           </AppText>
         </View>
       </View>
-
-      {message ? (
-        <View style={{ marginTop: spacing.lg }}>
-          <Notice tone={message.tone} message={message.text} testID="pro-message" />
-        </View>
-      ) : null}
 
       <Card style={{ marginTop: spacing.xl }} padded={false}>
         {FEATURES.map((f, i) => (
@@ -153,44 +201,16 @@ export default function ProScreen() {
         ))}
       </Card>
 
-      <View style={{ marginTop: spacing.xl }}>
+      <View style={{ marginTop: spacing.lg }}>
         {isPro ? (
-          <>
-            <Notice tone="success" title="You have Pro" message="Every feature above is unlocked, for good." />
-            <Button label="Done" fullWidth size="lg" onPress={dismiss} style={{ marginTop: spacing.lg }} testID="pro-done" />
-          </>
+          <Notice tone="success" title="You have Pro" message="Every feature above is unlocked, for good." />
         ) : (
-          <>
-            {!storeReady ? <Notice tone="info" message={unavailableText} testID="store-unavailable" /> : null}
-            <Button
-              label={storeReady ? `Unlock Pro for ${offer.priceString}` : 'Unlock Pro'}
-              variant="pro"
-              size="lg"
-              fullWidth
-              disabled={!storeReady}
-              loading={busy === 'buy'}
-              onPress={() => void buy()}
-              style={{ marginTop: spacing.lg }}
-              testID="pro-buy"
-            />
-            <AppText variant="caption" tone="muted" align="center" style={{ marginTop: spacing.sm }}>
-              Pay once and keep Pro forever. No subscription, no renewals. Billed by {billingStoreName()}. Restore it on any device signed in to the same {storeAccountName()}.
-            </AppText>
-            <Button
-              label="Restore purchases"
-              variant="ghost"
-              fullWidth
-              disabled={storeStatus !== 'ready'}
-              loading={busy === 'restore'}
-              onPress={() => void restore()}
-              style={{ marginTop: spacing.sm }}
-              testID="pro-restore"
-            />
-            <Button label="Not now" variant="ghost" fullWidth onPress={dismiss} testID="pro-not-now" />
-          </>
+          <AppText variant="caption" tone="muted" align="center">
+            Restore Pro on any device signed in to the same {storeAccountName()}.
+          </AppText>
         )}
       </View>
-      <View style={{ height: spacing.xl }} />
+      {pinFooter ? null : <View style={{ marginTop: spacing.lg }}>{footer}</View>}
     </Screen>
   );
 }
@@ -202,4 +222,7 @@ const styles = StyleSheet.create({
   feature: { flexDirection: 'row', alignItems: 'center' },
   featureIcon: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   flex: { flex: 1 },
+  footer: { borderTopWidth: StyleSheet.hairlineWidth },
+  links: { flexDirection: 'row', gap: 8 },
+  link: { flex: 1, paddingHorizontal: 8 },
 });

@@ -71,7 +71,7 @@ export function RotationSetup({ value, onChange, hour12 }: RotationSetupProps) {
               ]}
             >
               <AppText variant="bodyBold">{p.name}</AppText>
-              <AppText variant="caption" tone="muted" numberOfLines={2}>
+              <AppText variant="caption" tone="muted">
                 {p.tagline}
               </AppText>
             </Pressable>
@@ -220,11 +220,11 @@ const styles = StyleSheet.create({
   presetGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 8 },
   preset: { width: '49%', minHeight: 72 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: { width: 48, height: 52, alignItems: 'center', justifyContent: 'center' },
-  kellyChip: { paddingHorizontal: 12, height: 44, alignItems: 'center', justifyContent: 'center' },
+  chip: { minWidth: 48, minHeight: 52, paddingHorizontal: 4, paddingVertical: 4, alignItems: 'center', justifyContent: 'center' },
+  kellyChip: { paddingHorizontal: 12, minHeight: 44, paddingVertical: 6, alignItems: 'center', justifyContent: 'center' },
   rowButtons: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 8 },
   half: { flex: 1, alignSelf: 'stretch', paddingHorizontal: 8 },
   platoonRow: { flexDirection: 'row', gap: 10 },
-  platoon: { flex: 1, height: 72, alignItems: 'center', justifyContent: 'center' },
+  platoon: { flex: 1, minHeight: 72, paddingVertical: 6, alignItems: 'center', justifyContent: 'center' },
   platoonLetter: { fontSize: 30, fontWeight: '900', lineHeight: 34 },
 });
