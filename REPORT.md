@@ -98,3 +98,22 @@ npm run assets          # icons, splash, widget previews, feature graphic
 npm run screenshots     # store screenshots from dist/
 node scripts/check-listing.mjs
 ```
+
+## Session of 3 Nov 2026
+
+| Area | Result | How it was checked |
+|---|---|---|
+| iOS design pass | Paywall price and buttons pinned on screen; larger text no longer clips; sheets swipe to close; contrast and VoiceOver fixes; clearer copy | Web preview at 375 and 440 points, light and dark, doubled text sizes; 7 new Jest tests (190 total), 3 Playwright tests, tsc, eslint |
+| Site SEO | Titles and descriptions fit search results, structured data, breadcrumbs | Local build, then the live site: 12 pages load, 25 internal links load, department pages noindex |
+| Website | Live at https://tjcraw6589.github.io/rotawise/ | GitHub repo Tjcraw6589/rotawise, Pages from GitHub Actions |
+| RevenueCat | Project Rotawise, App Store app with valid key, product rotawise_pro_lifetime, entitlement pro, offering default | Dashboard; public key in app.json |
+| App Store Connect | Pro purchase ready (4.99 USD, 175 countries, review screenshot); listing text, links, categories, review contact, Free, manual release | Read back through App Store Connect |
+| TestFlight | Build 16 built and uploaded | Expo build and submission both finished |
+
+Not tested yet: the widgets on a real iPhone, build 16 on a device, a sandbox purchase and
+Restore purchases, and large text on a real iPhone (simulated in the browser only).
+
+Apple refuses the App Store Connect API key for portal calls since 3 Nov even after API access
+was re approved and a new key was made. Builds work by reusing the saved Apple sign in:
+`EXPO_APPLE_ID=<your Apple ID> eas build -p ios --profile production --non-interactive --no-wait --auto-submit`.
+If Apple asks for a sign in again, run `eas credentials -p ios` once and sign in.
