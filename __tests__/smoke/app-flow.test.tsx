@@ -1,4 +1,4 @@
-import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
+import { act, fireEvent, renderRouter, screen, waitFor, within } from 'expo-router/testing-library';
 
 import { defaultProfile } from '@/lib/model';
 import { rotationFromPreset } from '@/lib/rotation';
@@ -77,6 +77,20 @@ describe('Rotawise app flow (router)', () => {
     // The Jan 1 tour ended at 7 AM; the next one starts Jan 4.
     expect(screen.getByTestId('today-status').props.children).toBe("You're OFF");
     expect(screen.getByTestId('today-detail').props.children).toBe('Next shift in 2 days');
+    expect(screen.getByTestId('today-note').props.children).toBe('Enjoy your time off.');
+    // January 2027 on 24/48, A platoon: Jan 1, 4, 7 ... 31 is 11 tours, 264 hours, 20 days off.
+    expect(screen.getByLabelText('Tours, 11')).toBeTruthy();
+    expect(screen.getByLabelText('Hours, 264')).toBeTruthy();
+    expect(screen.getByLabelText('Days off, 20')).toBeTruthy();
+  });
+
+  test('the Today card wishes you a safe tour while you are on', async () => {
+    resetStore({ profile: proProfile });
+    jest.setSystemTime(new Date(2027, 0, 4, 9, 0));
+    await renderRouter('./src/app', { initialUrl: '/' });
+    await screen.findByTestId('today-screen');
+    expect(screen.getByTestId('today-status').props.children).toBe("You're ON");
+    expect(screen.getByTestId('today-note').props.children).toBe('Stay safe out there.');
   });
 
   test('free users who tap a Pro feature see the one time purchase screen', async () => {
@@ -109,7 +123,7 @@ describe('Rotawise app flow (router)', () => {
     await screen.findByTestId('calendar-screen');
     expect(screen.getByTestId('day-2027-01-04').props.accessibilityLabel).toContain('traded away');
     expect(screen.getByTestId('day-2027-01-07').props.accessibilityLabel).toContain("you're on, platoon A");
-    expect(screen.getByTestId('month-totals').props.children.join('')).toContain('10 shifts, 240 hours');
+    expect(screen.getByTestId('month-totals').props.children.join('')).toContain('10 tours, 240 hours');
     expectNoHyphens('calendar');
 
     await press('day-2027-01-04');
@@ -125,6 +139,10 @@ describe('Rotawise app flow (router)', () => {
     expect(useStore.getState().settings.showAllPlatoons).toBe(true);
     expect(screen.getByTestId('day-2027-01-02').props.accessibilityLabel).toContain('on duty: B');
     expect(screen.getByTestId('day-2027-01-03').props.accessibilityLabel).toContain('on duty: C');
+    // On your own days the big letter is enough: no second, smaller A badge in the cell.
+    const ownDay = screen.getByTestId('day-2027-01-04');
+    expect(within(ownDay).getAllByText('A')).toHaveLength(1);
+    expect(within(screen.getByTestId('day-2027-01-02')).getAllByText('B')).toHaveLength(1);
   });
 
   test('every screen renders for a Pro user, with no hyphens in the copy', async () => {
@@ -180,7 +198,8 @@ describe('Rotawise app flow (router)', () => {
     });
     await renderRouter('./src/app', { initialUrl: '/trades' });
     await screen.findByTestId('trades-balances');
-    expect(screen.getByText('Owes you 24 hours')).toBeTruthy();
+    // Smith works my Jan 4 tour, so I owe Smith.
+    expect(screen.getByText('You owe 24 hours')).toBeTruthy();
     await act(async () => screen.unmount());
 
     await renderRouter('./src/app', { initialUrl: '/overtime' });
@@ -192,8 +211,9 @@ describe('Rotawise app flow (router)', () => {
     await screen.findByTestId('pay-period-1');
     // Dec 20 to Jan 2 (paid Jan 8): tours Dec 20, 23, 26, 29, Jan 1 = 120 h, 106 straight + 14 overtime.
     expect(screen.getByTestId('pay-gross-0').props.children).toBe('$2,540.00');
-    // Jan 3 to 16: A works 4, 7, 10, 13, 16 minus traded Jan 4 and vacation Jan 7 = 72 h, plus 12 h overtime.
-    expect(screen.getByTestId('pay-gross-1').props.children).toBe('$1,800.00');
+    // Jan 3 to 16: A is credited 4, 10, 13, 16 (the Jan 4 trade still pays) = 96 h, plus 24 h vacation at straight time
+    // and 12 h logged overtime: 120 x 20 + 12 x 30.
+    expect(screen.getByTestId('pay-gross-1').props.children).toBe('$2,760.00');
     await act(async () => screen.unmount());
 
     await renderRouter('./src/app', { initialUrl: '/leave' });

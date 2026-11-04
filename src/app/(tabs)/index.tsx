@@ -13,9 +13,9 @@ import { TodayCard } from '@/components/TodayCard';
 import { WeekStrip } from '@/components/WeekStrip';
 import { useMoney } from '@/hooks/useCurrency';
 import { useActiveProfile, useNow, useProGate, useProfileOverrides, useTimeFormat } from '@/hooks/useData';
-import { formatHours } from '@/lib/format';
-import { defaultShiftHours } from '@/lib/model';
-import { addDays, currentPayPeriod, effectiveShifts, estimateGross, formatShortDate, nextPayday, payPeriods, todayCard, tradeBalances } from '@/lib/rotation';
+import { formatHours, formatNumber } from '@/lib/format';
+import { defaultShiftHours, shiftWord } from '@/lib/model';
+import { addDays, currentPayPeriod, daysInMonth, effectiveShifts, estimateGross, formatShortDate, MONTH_NAMES, monthTotals, nextPayday, parseISO, payPeriods, startOfMonth, summarizeDays, todayCard, tradeBalances } from '@/lib/rotation';
 import { useStore } from '@/store/useStore';
 import { useTheme } from '@/theme/useTheme';
 
@@ -40,6 +40,13 @@ export default function TodayScreen() {
     return { payday, gross: estimateGross(shifts, period, pay).gross };
   }, [isPro, pay, now.date, profile, overrides]);
 
+  const month = useMemo(() => {
+    const { year, month: m } = parseISO(now.date);
+    const totals = monthTotals(profile.rotation, profile.platoon, year, m, overrides);
+    const days = summarizeDays(profile.rotation, profile.platoon, startOfMonth(now.date), daysInMonth(year, m), overrides);
+    return { name: MONTH_NAMES[m - 1], shifts: totals.shifts, hours: totals.hours, off: days.filter((d) => !d.on).length };
+  }, [now.date, profile, overrides]);
+
   const owed = useMemo(() => (isPro ? tradeBalances(overrides, defaultShiftHours(profile)) : []), [isPro, overrides, profile]);
   const others = profiles.filter((p) => p.id !== profile.id);
 
@@ -55,6 +62,26 @@ export default function TodayScreen() {
 
       <SectionHeader title="Next 7 days" />
       <WeekStrip profile={profile} overrides={overrides} from={now.date} />
+
+      <SectionHeader title={`${month.name} at a glance`} />
+      <View style={styles.tiles} testID="today-month">
+        {[
+          { label: shiftWord(profile.rotation, 2) === 'tours' ? 'Tours' : 'Shifts', value: formatNumber(month.shifts), id: 'month-shifts' },
+          { label: 'Hours', value: formatNumber(month.hours), id: 'month-hours' },
+          { label: 'Days off', value: formatNumber(month.off), id: 'month-off' },
+        ].map((t) => (
+          <Card key={t.id} style={styles.tile} testID={t.id}>
+            <View accessible accessibilityLabel={`${t.label}, ${t.value}`}>
+              <AppText variant="caption" tone="muted" maxFontSizeMultiplier={1.3} numberOfLines={1}>
+                {t.label}
+              </AppText>
+              <AppText variant="h2" maxFontSizeMultiplier={1.3} numberOfLines={1}>
+                {t.value}
+              </AppText>
+            </View>
+          </Card>
+        ))}
+      </View>
 
       {others.length > 0 ? (
         <>
@@ -121,6 +148,8 @@ export default function TodayScreen() {
 
 const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: 8 },
+  tiles: { flexDirection: 'row', gap: 8 },
+  tile: { flex: 1 },
   action: { flex: 1, alignSelf: 'stretch' },
   otherRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   divider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#8883' },

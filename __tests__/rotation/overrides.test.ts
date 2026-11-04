@@ -69,6 +69,7 @@ describe('trades override the base rotation', () => {
   });
 
   it('the ledger says who owes whom and drops settled trades', () => {
+    // Smith worked two of my shifts, so I owe Smith; I worked two of Jones's and Jones worked one of mine.
     const ledger: Override[] = [
       gave,
       took,
@@ -78,8 +79,8 @@ describe('trades override the base rotation', () => {
       { id: 't11', kind: 'trade', date: '2027-02-04', direction: 'gave', counterpart: 'Jones', settled: false },
     ];
     expect(tradeBalances(ledger, 24)).toEqual([
-      { counterpart: 'Jones', hours: -24, open: 3 },
-      { counterpart: 'Smith', hours: 36, open: 2 },
+      { counterpart: 'Jones', hours: 24, open: 3 },
+      { counterpart: 'Smith', hours: -36, open: 2 },
     ]);
   });
 });

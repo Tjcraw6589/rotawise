@@ -27,6 +27,8 @@ describe('24 hour tours are one shift spanning two dates', () => {
     expect(monthTotals(r, 'A', 2027, 3)).toEqual({ shifts: 11, hours: 264 });
     // April starts with Apr 3.
     expect(monthTotals(r, 'A', 2027, 4)).toEqual({ shifts: 10, hours: 240 });
+    // A 4 hour callback adds hours but is not another tour.
+    expect(monthTotals(r, 'A', 2027, 4, [{ id: 'cb', kind: 'extra', date: '2027-04-02', category: 'callback', hours: 4 }])).toEqual({ shifts: 10, hours: 244 });
   });
 
   it('is ON through midnight and OFF at the 7 AM handover', () => {

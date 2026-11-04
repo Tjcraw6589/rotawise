@@ -11,8 +11,9 @@ import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { YearGrid } from '@/components/YearGrid';
 import { useActiveProfile, useNow, useProGate, useProfileOverrides } from '@/hooks/useData';
-import { formatHours } from '@/lib/format';
-import { effectiveShifts, isWorking, parseISO, presetInfo, PLATOONS } from '@/lib/rotation';
+import { formatHours, formatNumber } from '@/lib/format';
+import { shiftWord } from '@/lib/model';
+import { parseISO, presetInfo, PLATOONS, workTotals } from '@/lib/rotation';
 import { yearCalendarDocument } from '@/lib/yearHtml';
 import { shareViewImage, shareYearPdf } from '@/services/share';
 import { useStore } from '@/store/useStore';
@@ -33,8 +34,7 @@ export default function YearScreen() {
   const [busy, setBusy] = useState<null | 'pdf' | 'image'>(null);
   const shotRef = useRef<ComponentRef<typeof View>>(null);
 
-  const working = effectiveShifts(profile.rotation, profile.platoon, `${year}-01-01`, `${year}-12-31`, overrides).filter(isWorking);
-  const hours = working.reduce((h, s) => h + s.durationMinutes / 60, 0);
+  const totals = workTotals(profile.rotation, profile.platoon, `${year}-01-01`, `${year}-12-31`, overrides);
   const rotationName = profile.rotation.presetId === 'custom' ? 'Custom pattern' : presetInfo(profile.rotation.presetId).name;
 
   const pdf = async () => {
@@ -96,7 +96,7 @@ export default function YearScreen() {
       />
       <View ref={shotRef} collapsable={false} style={{ backgroundColor: colors.background, paddingVertical: spacing.md }}>
         <AppText variant="bodyBold" style={{ marginBottom: spacing.sm }} testID="year-summary">
-          {profile.platoon} platoon, {rotationName}: {working.length} shifts, {formatHours(hours)}
+          {profile.platoon} platoon, {rotationName}: {formatNumber(totals.shifts)} {shiftWord(profile.rotation, totals.shifts)}, {formatHours(totals.hours)}
         </AppText>
         <YearGrid
           year={year}

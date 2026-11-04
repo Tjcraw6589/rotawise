@@ -128,7 +128,11 @@ export default function EntryScreen() {
             onChange={setDirection}
             testID="entry-direction"
           />
-          <View style={{ height: spacing.lg }} />
+          <AppText variant="caption" tone="muted" style={{ marginTop: spacing.sm, marginBottom: spacing.lg }} testID="entry-trade-hint">
+            {direction === 'gave'
+              ? 'This day comes off your calendar and you owe them the time. Your pay stays the same.'
+              : 'This shift goes on your calendar and they owe you the time. It is not added to your pay.'}
+          </AppText>
           <TextField label="Traded with" placeholder="Name" value={counterpart} onChangeText={setCounterpart} maxLength={40} testID="entry-counterpart" />
         </>
       ) : null}

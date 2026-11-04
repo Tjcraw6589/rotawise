@@ -65,6 +65,7 @@ describe('estimated gross pay', () => {
     const shifts = effectiveShifts(r, 'A', period.start, period.end);
     expect(estimateGross(shifts, period, biweekly)).toEqual({
       scheduledHours: 120,
+      leaveHours: 0,
       extraHours: 0,
       regularHours: 106,
       overtimeHours: 14,
@@ -74,18 +75,41 @@ describe('estimated gross pay', () => {
     });
   });
 
-  it('adds logged overtime at the multiplier and drops traded away and leave days', () => {
+  it('adds logged overtime at the multiplier and still pays a shift someone works for you', () => {
     const o: Override[] = [
       { id: 'x', kind: 'extra', date: '2027-01-05', category: 'overtime', hours: 12 },
       { id: 't', kind: 'trade', date: '2027-01-07', direction: 'gave', counterpart: 'Smith', settled: false },
     ];
     const shifts = effectiveShifts(r, 'A', period.start, period.end, o);
     const g = estimateGross(shifts, period, biweekly);
-    expect(g.scheduledHours).toBe(96);
+    expect(g.scheduledHours).toBe(120);
     expect(g.extraHours).toBe(12);
+    expect(g.regularHours).toBe(106);
+    expect(g.overtimeHours).toBe(14 + 12);
+    expect(g.gross).toBe(106 * 20 + 26 * 30);
+  });
+
+  it('pays vacation at straight time, not a shift you cover, and not a Kelly day', () => {
+    const o: Override[] = [
+      { id: 'v', kind: 'leave', date: '2027-01-07', leaveType: 'vacation' },
+      { id: 'k', kind: 'leave', date: '2027-01-10', leaveType: 'kelly' },
+      { id: 'in', kind: 'trade', date: '2027-01-05', direction: 'took', counterpart: 'Jones', settled: false },
+    ];
+    const g = estimateGross(effectiveShifts(r, 'A', period.start, period.end, o), period, biweekly);
+    // Worked Jan 4, 13 and 16 (72 hours), 24 vacation hours, Kelly day unpaid, the covered shift unpaid.
+    expect(g.scheduledHours).toBe(72);
+    expect(g.leaveHours).toBe(24);
     expect(g.regularHours).toBe(96);
-    expect(g.overtimeHours).toBe(12);
-    expect(g.gross).toBe(96 * 20 + 12 * 30);
+    expect(g.overtimeHours).toBe(0);
+    expect(g.gross).toBe(96 * 20);
+  });
+
+  it('vacation does not push you into overtime', () => {
+    // 120 hours on the rotation with one tour on vacation: 96 worked plus 24 paid leave, no overtime.
+    const o: Override[] = [{ id: 'v', kind: 'leave', date: '2027-01-16', leaveType: 'vacation' }];
+    const g = estimateGross(effectiveShifts(r, 'A', period.start, period.end, o), period, biweekly);
+    expect(g.overtimeHours).toBe(0);
+    expect(g.gross).toBe(120 * 20);
   });
 
   it('rounds to cents', () => {

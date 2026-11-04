@@ -43,7 +43,7 @@ export default function PayScreen() {
     <Screen scroll testID="pay-screen">
       <Header title="Pay and paydays" dismiss="back" />
       <AppText variant="caption" tone="muted">
-        Estimates are before taxes and deductions, from your scheduled hours, trades, leave and logged overtime.
+        Estimates before taxes and deductions. A trade does not change your pay: you are paid for your own shifts. Vacation and sick hours are paid at straight time.
       </AppText>
 
       <SectionHeader title="Pay period" />
@@ -87,7 +87,7 @@ export default function PayScreen() {
       />
       <Stepper label="Straight time hours per period" value={pay.regularHoursPerPeriod} display={formatHours(pay.regularHoursPerPeriod)} min={1} max={400} onChange={(n) => set({ regularHoursPerPeriod: n })} testID="pay-regular" />
       <AppText variant="caption" tone="muted" style={{ marginTop: -spacing.sm, marginBottom: spacing.md }}>
-        Hours paid at your normal rate before overtime starts. Firefighters on a 14 day period often use 106; most others use 80 for two weeks or 40 for one.
+        Hours paid at your normal rate before overtime starts. On a 14 day period, firefighters often use 106 and police 86; most others use 80 for two weeks or 40 for one.
       </AppText>
       <Stepper label="Overtime multiplier" value={pay.otMultiplier} display={`${pay.otMultiplier.toFixed(2)}x`} step={0.25} min={1} max={3} onChange={(n) => set({ otMultiplier: n })} testID="pay-ot" />
       <Button

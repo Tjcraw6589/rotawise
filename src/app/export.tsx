@@ -73,8 +73,7 @@ export default function ExportScreen() {
 
       <SectionHeader title="Settings" />
       <Card padded={false}>
-        <Row title="Calendar" value={chosen ? chosen.title : 'New "Rotawise shifts"'} onPress={() => setPicker(true)} testID="export-calendar" />
-        <Row title="Shifts for" value={`${state.monthsAhead} months`} last />
+        <Row title="Calendar" value={chosen ? chosen.title : 'New "Rotawise shifts"'} onPress={() => setPicker(true)} testID="export-calendar" last />
       </Card>
       <Stepper
         label="Months ahead"
@@ -89,7 +88,7 @@ export default function ExportScreen() {
         <Notice tone={result.ok ? 'success' : 'warning'} message={result.message} testID="export-result" />
       ) : state.lastExportAt ? (
         <AppText variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
-          Last updated {new Date(state.lastExportAt).toLocaleString()}. Updating replaces the earlier events, so trades and leave stay current.
+          Last updated {new Date(state.lastExportAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}. Updating replaces the earlier events, so trades and leave stay current.
         </AppText>
       ) : null}
 

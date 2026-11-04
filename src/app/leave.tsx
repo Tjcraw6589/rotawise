@@ -11,7 +11,7 @@ import { Screen } from '@/components/Screen';
 import { SectionHeader } from '@/components/SectionHeader';
 import { Stepper } from '@/components/Stepper';
 import { useActiveProfile, useNow, useProfileOverrides } from '@/hooks/useData';
-import { formatHours } from '@/lib/format';
+import { formatHours, formatNumber } from '@/lib/format';
 import { defaultShiftHours } from '@/lib/model';
 import { leaveBalances } from '@/lib/rotation';
 import { useStore } from '@/store/useStore';
@@ -31,14 +31,14 @@ export default function LeaveScreen() {
 
   const tile = (label: string, left: number, used: string, hours: boolean, testID: string) => (
     <Card style={styles.tile} testID={testID}>
-      <AppText variant="caption" tone="muted">
-        {label}
+      <AppText variant="caption" tone="muted" maxFontSizeMultiplier={1.3}>
+        {label} left
       </AppText>
-      <AppText variant="h2" style={{ color: left < 0 ? colors.danger : colors.text }}>
-        {hours ? formatHours(left) : `${left} ${Math.abs(left) === 1 ? 'day' : 'days'}`}
+      <AppText variant="h2" maxFontSizeMultiplier={1.3} style={{ color: left < 0 ? colors.danger : colors.text }}>
+        {hours ? formatHours(left) : `${formatNumber(left)} ${Math.abs(left) === 1 ? 'day' : 'days'}`}
       </AppText>
-      <AppText variant="caption" tone="muted">
-        left, {used} used
+      <AppText variant="caption" tone="muted" maxFontSizeMultiplier={1.3}>
+        {used} used
       </AppText>
     </Card>
   );
@@ -52,7 +52,7 @@ export default function LeaveScreen() {
       <View style={[styles.tiles, { marginTop: spacing.md }]}>
         {tile('Vacation', b.vacationLeft, formatHours(b.vacationUsed), true, 'leave-vacation')}
         {tile('Sick', b.sickLeft, formatHours(b.sickUsed), true, 'leave-sick')}
-        {tile('Kelly', b.kellyLeft, `${b.kellyUsed}`, false, 'leave-kelly')}
+        {tile('Kelly days', b.kellyLeft, `${formatNumber(b.kellyUsed)} ${b.kellyUsed === 1 ? 'day' : 'days'}`, false, 'leave-kelly')}
       </View>
       <Button label="Log leave" fullWidth onPress={() => router.push({ pathname: '/entry', params: { kind: 'leave', date: now.date } })} style={{ marginTop: spacing.lg }} testID="leave-add" />
 

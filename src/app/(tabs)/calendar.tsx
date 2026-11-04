@@ -10,7 +10,8 @@ import { MonthCalendar, type OverlayLayer } from '@/components/MonthCalendar';
 import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { useActiveProfile, useNow, useProfileOverrides } from '@/hooks/useData';
-import { formatHours } from '@/lib/format';
+import { formatHours, formatNumber } from '@/lib/format';
+import { shiftWord } from '@/lib/model';
 import { MONTH_NAMES, monthTotals, parseISO } from '@/lib/rotation';
 import { useStore } from '@/store/useStore';
 import { useTheme } from '@/theme/useTheme';
@@ -98,7 +99,7 @@ export default function CalendarScreen() {
         onDayPress={setDayOpen}
       />
       <AppText variant="bodyBold" style={{ marginTop: spacing.lg }} testID="month-totals">
-        {totals.shifts} {totals.shifts === 1 ? 'shift' : 'shifts'}, {formatHours(totals.hours)}
+        {formatNumber(totals.shifts)} {shiftWord(profile.rotation, totals.shifts)}, {formatHours(totals.hours)}
       </AppText>
       <DaySheet date={dayOpen} profile={profile} overrides={overrides} onClose={() => setDayOpen(null)} />
     </Screen>

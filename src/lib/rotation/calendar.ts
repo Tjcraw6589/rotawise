@@ -144,10 +144,16 @@ export function todayCard(rotation: Rotation, platoon: Platoon, date: ISODate, m
   };
 }
 
-/** Count of working shifts and hours in a calendar month. */
-export function monthTotals(rotation: Rotation, platoon: Platoon, year: number, month: number, overrides: readonly Override[] = []): { shifts: number; hours: number } {
-  const from = toISO({ year, month, day: 1 });
-  const to = toISO({ year, month, day: daysInMonth(year, month) });
+/**
+ * Shifts and hours worked between two dates. The count is rotation and trade shifts only, so a
+ * 4 hour callback is not counted as a tour; the hours include logged overtime and extra shifts.
+ */
+export function workTotals(rotation: Rotation, platoon: Platoon, from: ISODate, to: ISODate, overrides: readonly Override[] = []): { shifts: number; hours: number } {
   const working = effectiveShifts(rotation, platoon, from, to, overrides).filter(isWorking);
-  return { shifts: working.length, hours: working.reduce((h, s) => h + s.durationMinutes / 60, 0) };
+  return { shifts: working.filter((s) => s.source !== 'extra').length, hours: working.reduce((h, s) => h + s.durationMinutes / 60, 0) };
+}
+
+/** Shifts and hours worked in a calendar month (see workTotals). */
+export function monthTotals(rotation: Rotation, platoon: Platoon, year: number, month: number, overrides: readonly Override[] = []): { shifts: number; hours: number } {
+  return workTotals(rotation, platoon, toISO({ year, month, day: 1 }), toISO({ year, month, day: daysInMonth(year, month) }), overrides);
 }

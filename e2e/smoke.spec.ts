@@ -40,7 +40,7 @@ test.describe('Rotawise web smoke test', () => {
     await expect(page.getByTestId('day-sheet').getByText('24 hour tour, 7 AM to 7 AM next day')).toBeVisible();
 
     await page.goto('/year');
-    await expect(page.getByTestId('year-summary')).toContainText('B platoon, 24/48: 122 shifts');
+    await expect(page.getByTestId('year-summary')).toContainText('B platoon, 24/48: 122 tours, 2,928 hours');
 
     await page.goto('/widgets');
     await expect(page.getByTestId('widget-preview-small')).toContainText('ON');

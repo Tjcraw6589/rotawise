@@ -85,7 +85,10 @@ export function nextPayday(settings: PaySettings, date: ISODate): ISODate {
 }
 
 export interface GrossEstimate {
+  /** Your own rotation hours, including shifts someone works for you on a trade. */
   scheduledHours: number;
+  /** Paid vacation and sick hours, at straight time. */
+  leaveHours: number;
   extraHours: number;
   regularHours: number;
   overtimeHours: number;
@@ -95,19 +98,26 @@ export interface GrossEstimate {
 }
 
 /**
- * Estimated gross for a period. Scheduled hours up to the regular threshold are straight
- * time; everything above it, plus every logged extra/overtime hour, is paid at the OT
- * multiplier.
+ * Estimated gross for a period, the way US fire, EMS and police payroll usually works:
+ * - Your own scheduled shifts are paid even when someone works them for you on a trade, and a
+ *   shift you cover for someone else is not (FLSA section 7(p)(3): trades leave pay unchanged).
+ * - Vacation and sick hours are paid at straight time but do not count toward overtime.
+ * - Kelly days and other leave are unpaid days off.
+ * - Credited hours above the regular threshold, plus every logged extra hour, are paid at the
+ *   overtime multiplier.
  */
 export function estimateGross(shifts: readonly ShiftInstance[], period: PayPeriod, settings: PaySettings): GrossEstimate {
-  const inPeriod = shifts.filter((s) => isWorking(s) && s.date >= period.start && s.date <= period.end);
-  const scheduledHours = inPeriod.filter((s) => s.source !== 'extra').reduce((h, s) => h + s.durationMinutes / 60, 0);
-  const extraHours = inPeriod.filter((s) => s.source === 'extra').reduce((h, s) => h + s.durationMinutes / 60, 0);
-  const regularHours = Math.min(scheduledHours, settings.regularHoursPerPeriod);
+  const inPeriod = shifts.filter((s) => s.date >= period.start && s.date <= period.end);
+  const hoursOf = (list: readonly ShiftInstance[]) => list.reduce((h, s) => h + s.durationMinutes / 60, 0);
+  const own = inPeriod.filter((s) => s.source === 'rotation');
+  const scheduledHours = hoursOf(own.filter((s) => s.status === 'scheduled' || s.status === 'traded-away'));
+  const leaveHours = hoursOf(own.filter((s) => s.status === 'vacation' || s.status === 'sick'));
+  const extraHours = hoursOf(inPeriod.filter((s) => s.source === 'extra' && isWorking(s)));
+  const regularHours = Math.min(scheduledHours, settings.regularHoursPerPeriod) + leaveHours;
   const overtimeHours = Math.max(0, scheduledHours - settings.regularHoursPerPeriod) + extraHours;
   const regularPay = round2(regularHours * settings.hourlyRate);
   const overtimePay = round2(overtimeHours * settings.hourlyRate * settings.otMultiplier);
-  return { scheduledHours, extraHours, regularHours, overtimeHours, regularPay, overtimePay, gross: round2(regularPay + overtimePay) };
+  return { scheduledHours, leaveHours, extraHours, regularHours, overtimeHours, regularPay, overtimePay, gross: round2(regularPay + overtimePay) };
 }
 
 export function round2(n: number): number {
@@ -160,7 +170,10 @@ export interface TradeBalance {
   open: number;
 }
 
-/** Who owes whom, from unsettled trades. Giving a shift means they owe you; taking one means you owe them. */
+/**
+ * Who owes whom, from unsettled trades. When someone works your shift (gave), you owe them that time;
+ * when you work theirs (took), they owe you.
+ */
 export function tradeBalances(overrides: readonly Override[], defaultShiftHours: number): TradeBalance[] {
   const map = new Map<string, TradeBalance>();
   for (const o of overrides) {
@@ -168,7 +181,7 @@ export function tradeBalances(overrides: readonly Override[], defaultShiftHours:
     const key = o.counterpart.trim() || 'Unknown';
     const entry = map.get(key) ?? { counterpart: key, hours: 0, open: 0 };
     const hours = o.hours ?? defaultShiftHours;
-    entry.hours += o.direction === 'gave' ? hours : -hours;
+    entry.hours += o.direction === 'took' ? hours : -hours;
     entry.open += 1;
     map.set(key, entry);
   }

@@ -1,7 +1,7 @@
 import { shiftEvents } from '@/lib/calendarEvents';
-import { defaultProfile } from '@/lib/model';
+import { defaultProfile, shiftWord } from '@/lib/model';
 import { rotationFromPreset } from '@/lib/rotation';
-import { formatHours, formatMoney, parseAmount } from '@/lib/format';
+import { formatHours, formatMoney, formatNumber, parseAmount } from '@/lib/format';
 
 describe('calendar export events', () => {
   const profile = { ...defaultProfile('2027-03-01'), rotation: rotationFromPreset('24-48', '2027-03-01', null), platoon: 'A' as const };
@@ -40,6 +40,11 @@ describe('formatting', () => {
     expect(formatHours(1)).toBe('1 hour');
     expect(formatHours(24)).toBe('24 hours');
     expect(formatHours(7.5)).toBe('7.5 hours');
+    expect(formatHours(2184)).toBe('2,184 hours');
+    expect(formatNumber(12345.678)).toBe('12,345.68');
+    expect(shiftWord(rotationFromPreset('24-72', '2027-01-01'), 7)).toBe('tours');
+    expect(shiftWord(rotationFromPreset('kelly', '2027-01-01'), 1)).toBe('tour');
+    expect(shiftWord(rotationFromPreset('pitman', '2027-01-01'), 13)).toBe('shifts');
     expect(parseAmount('23.50')).toBe(23.5);
     expect(parseAmount('23,50')).toBe(23.5);
     expect(parseAmount('$41')).toBe(41);

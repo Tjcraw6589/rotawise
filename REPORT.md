@@ -117,3 +117,27 @@ Apple refuses the App Store Connect API key for portal calls since 3 Nov even af
 was re approved and a new key was made. Builds work by reusing the saved Apple sign in:
 `EXPO_APPLE_ID=<your Apple ID> eas build -p ios --profile production --non-interactive --no-wait --auto-submit`.
 If Apple asks for a sign in again, run `eas credentials -p ios` once and sign in.
+
+## UI and accuracy pass (3 Nov 2026, evening)
+
+Walked every screen in the web build as a new user (24/72, D platoon, then Pitman C) at 393 by 852
+and 375 by 667, light and dark, free and Pro.
+
+| Change | Why |
+|---|---|
+| Trades ledger: "They work my shift" now means you owe them | It said they owed you, the wrong way round |
+| Pay estimate: a shift someone works for you on a trade is still paid; one you cover is not; vacation and sick hours are paid at straight time and do not push you into overtime; Kelly days stay unpaid | Matches how US fire, EMS and police payroll handles trades (FLSA section 7(p)(3)) and paid leave. Before, a trade or a vacation day cut the estimate |
+| Pay help text adds police (86 hours on a 14 day period) next to firefighters (106) | The FLSA 7(k) thresholds |
+| Pitman: "2 on, 2 off, 3 on, 12 hour days and nights", called Panama. 2 2 3: "2 on, 2 off, 3 on, 12 hour days only". Kelly: "24 on, 24 off, 24 on, 24 off, 24 on, 4 off" | Pitman and 2 2 3 had the same tagline; the Kelly line said "three times", which did not match the 9 day cycle |
+| Today: "November at a glance" row (tours or shifts, hours, days off) and a short line on the card: "Stay safe out there.", "Rest up before your next shift." or "Enjoy your time off." | The bottom half was empty |
+| "Tours" on 24 hour rotations and "shifts" on the rest, on Today, Month and Year. The count leaves out overtime entries and callbacks; the hours still include them | A 4 hour callback was counted as a tour |
+| Thousands separators: "2,184 hours" | Year said "2184 hours" |
+| Month, all platoons: no second small badge of your own letter on your days | Duplicate |
+| Trade entry explains what the trade does to your calendar, who owes whom, and your pay | Plain language |
+| Leave tiles read "Vacation left / 216 hours / 24 hours used" | Captions wrapped into "left, 0 hours used" |
+| Share with a calendar: removed the "Shifts for" row that repeated the Months ahead stepper; the last updated time no longer uses the phone's locale (some locales print dates with hyphens) | Duplicate; no hyphens rule |
+| Three across tiles cap text growth at 1.3 like the week strip, and each tile reads as one item in VoiceOver | Large text and screen readers |
+
+Gate: tsc (app and site), eslint, 194 Jest tests, 3 Playwright tests, site build (descriptions
+within 160 characters). Store screenshots regenerated. Still not tested: widgets on a device,
+large text on a real iPhone, and the pay rules against a real department's payroll.

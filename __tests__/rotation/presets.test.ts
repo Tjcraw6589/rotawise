@@ -42,6 +42,12 @@ describe('every preset', () => {
     expect(PRESETS.map((p) => p.id)).toContain('custom');
   });
 
+  it('gives every preset its own tagline, and only Pitman is called Panama', () => {
+    const taglines = PRESETS.map((p) => p.tagline);
+    expect(new Set(taglines).size).toBe(taglines.length);
+    expect(PRESETS.filter((p) => p.description.includes('Panama')).map((p) => p.id)).toEqual(['pitman']);
+  });
+
   it.each(ALL_PRESETS)('%s advances exactly one cycle day per calendar day through leap years (oracle check, 2024 to 2030)', (id) => {
     const r = plain(id, ANCHOR);
     const L = r.cycle.length;

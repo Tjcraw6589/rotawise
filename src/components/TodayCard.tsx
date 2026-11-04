@@ -17,19 +17,27 @@ interface TodayCardProps {
   formatTime: (m: number) => string;
 }
 
+/** A short, respectful line under the status. */
+export function todayNote(card: { on: boolean; daysUntilNext: number | null }): string {
+  if (card.on) return 'Stay safe out there.';
+  if (card.daysUntilNext === 0 || card.daysUntilNext === 1) return 'Rest up before your next shift.';
+  return 'Enjoy your time off.';
+}
+
 /** The big, readable at a glance answer: are you on or off, and when is the next shift. */
 export function TodayCard({ profile, overrides, date, minutes, formatTime }: TodayCardProps) {
   const { colors, radius, spacing, typography } = useTheme();
   const card = todayCard(profile.rotation, profile.platoon, date, minutes, overrides, formatTime);
   const platoonColor = PLATOON_COLORS[profile.platoon];
   const rotationName = profile.rotation.presetId === 'custom' ? 'Custom pattern' : presetInfo(profile.rotation.presetId).name;
+  const note = todayNote(card);
   const bg = card.on ? platoonColor.fill : colors.surface;
   const fg = card.on ? platoonColor.text : colors.text;
   return (
     <View
       testID="today-card"
       accessible
-      accessibilityLabel={`${formatLongDate(date)}. ${card.headline}. ${card.detail}. Platoon ${profile.platoon}.`}
+      accessibilityLabel={`${formatLongDate(date)}. ${card.headline}. ${card.detail}. ${note} Platoon ${profile.platoon}.`}
       style={[styles.card, { backgroundColor: bg, borderRadius: radius.xl, padding: spacing.xl, borderColor: card.on ? bg : colors.border }]}
     >
       <View style={styles.top}>
@@ -43,6 +51,9 @@ export function TodayCard({ profile, overrides, date, minutes, formatTime }: Tod
       </AppText>
       <AppText testID="today-detail" variant="h3" style={{ color: fg, marginTop: spacing.xs }}>
         {card.detail}
+      </AppText>
+      <AppText testID="today-note" style={{ color: fg, opacity: 0.9, marginTop: spacing.sm }}>
+        {note}
       </AppText>
       <AppText variant="caption" style={{ color: fg, opacity: 0.85, marginTop: spacing.md }}>
         {profile.platoon} platoon on {rotationName}

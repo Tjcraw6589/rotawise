@@ -81,6 +81,9 @@ export function MonthCalendar({ year, month, profile, overrides, showAll, overla
             const code = d?.code ?? '';
             const isToday = date === today;
             const onDuty = all.get(date) ?? [];
+            const label = on ? dayCellLabel(profile.platoon, true, code) : '';
+            // Your own letter is already the big label on your days; the badge row shows the others.
+            const badges = label.startsWith(profile.platoon) ? onDuty.filter((p) => p !== profile.platoon) : onDuty;
             const parts: string[] = [formatLongDate(date)];
             if (on) parts.push(`you're on, platoon ${profile.platoon}${code && code !== '24' ? `, ${CODE_NAMES[code] ?? code}` : ''}`);
             else if (code) parts.push(CODE_NAMES[code] ?? code);
@@ -116,14 +119,14 @@ export function MonthCalendar({ year, month, profile, overrides, showAll, overla
                   </View>
                   {on ? (
                     <AppText style={[styles.code, { color: pc.text }]} numberOfLines={1}>
-                      {dayCellLabel(profile.platoon, true, code)}
+                      {label}
                     </AppText>
                   ) : code ? (
                     <AppText style={[styles.code, { color: colors.textMuted }]}>{code}</AppText>
                   ) : null}
-                  {showAll && onDuty.length > 0 ? (
+                  {showAll && badges.length > 0 ? (
                     <View style={styles.badges}>
-                      {onDuty.map((p) => (
+                      {badges.map((p) => (
                         <View key={p} style={[styles.mini, { backgroundColor: PLATOON_COLORS[p].fill, borderColor: on ? pc.text : 'transparent' }]}>
                           <AppText style={[styles.miniText, { color: PLATOON_COLORS[p].text }]}>{p}</AppText>
                         </View>

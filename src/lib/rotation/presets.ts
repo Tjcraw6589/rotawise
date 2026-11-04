@@ -93,7 +93,7 @@ const builders: Record<Exclude<PresetId, 'custom'>, Builder> = {
     anchorDate,
     kelly: { everyNthShift: 7 },
   }),
-  // Pitman: 14 day cycle, 12 hour shifts, 2 on 2 off 3 on 2 off 2 on 3 off.
+  // Pitman (often called Panama): 14 day cycle, 12 hour shifts, 2 on 2 off 3 on 2 off 2 on 3 off.
   // Four platoons: A and B work days opposite each other, C and D work nights.
   pitman: (anchorDate) => ({
     presetId: 'pitman',
@@ -115,7 +115,7 @@ const builders: Record<Exclude<PresetId, 'custom'>, Builder> = {
     anchorDate,
     kelly: null,
   }),
-  // 2 2 3 (Panama): 14 day cycle of 12 hour days, two platoons that mirror each other.
+  // 2 2 3: 14 day cycle of 12 hour days, two platoons that mirror each other.
   '2-2-3': (anchorDate) => ({
     presetId: '2-2-3',
     cycle: [...on(DAY_12.id, 2), ...off(2), ...on(DAY_12.id, 3), ...off(2), ...on(DAY_12.id, 2), ...off(3)],
@@ -181,7 +181,7 @@ export const PRESETS: PresetInfo[] = [
   {
     id: 'kelly',
     name: 'Kelly schedule',
-    tagline: '24 on, 24 off, three times, then 4 off',
+    tagline: '24 on, 24 off, 24 on, 24 off, 24 on, 4 off',
     description:
       'Three platoons on a nine day cycle: on, off, on, off, on, then four days off. Add Kelly days, an extra day off every Nth tour, at whatever interval your department uses.',
     usedBy: 'Fire departments with a Kelly day agreement',
@@ -192,8 +192,8 @@ export const PRESETS: PresetInfo[] = [
   {
     id: 'pitman',
     name: 'Pitman',
-    tagline: '2 on, 2 off, 3 on, 2 off, 2 on, 3 off',
-    description: 'Four platoons on 12 hour shifts over a 14 day cycle. A and B work days, C and D work nights. Every other weekend is a three day weekend.',
+    tagline: '2 on, 2 off, 3 on, 12 hour days and nights',
+    description: 'Four platoons on 12 hour shifts over a 14 day cycle. A and B work days, C and D work nights. Every other weekend is a three day weekend. Also called the Panama schedule.',
     usedBy: 'Police, dispatch, hospitals and plants',
     platoonCount: 4,
     cycleLength: 14,
@@ -212,8 +212,8 @@ export const PRESETS: PresetInfo[] = [
   {
     id: '2-2-3',
     name: '2 2 3',
-    tagline: '2 on, 2 off, 3 on, 2 off, 2 on, 3 off',
-    description: 'Two platoons on 12 hour days over a 14 day cycle. Also called the Panama schedule.',
+    tagline: '2 on, 2 off, 3 on, 12 hour days only',
+    description: 'Two platoons on 12 hour days over a 14 day cycle, so one platoon covers each day. Every other weekend is a three day weekend.',
     usedBy: 'Police, corrections, dispatch and hospitals',
     platoonCount: 2,
     cycleLength: 14,

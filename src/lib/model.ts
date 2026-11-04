@@ -98,6 +98,12 @@ export function newId(prefix: string): string {
 }
 
 /** Hours in the profile's main shift, used when a trade or leave entry has no hours of its own. */
+/** "tour" on 24 hour rotations, as fire crews say it; "shift" on everything else. Plural unless the count is 1. */
+export function shiftWord(rotation: Rotation, count: number): string {
+  const tours = rotation.shiftTypes.length > 0 && rotation.shiftTypes.every((t) => t.durationMinutes >= 24 * 60);
+  return `${tours ? 'tour' : 'shift'}${count === 1 ? '' : 's'}`;
+}
+
 export function defaultShiftHours(profile: Profile): number {
   const first = profile.rotation.shiftTypes[0];
   return first ? first.durationMinutes / 60 : 24;
