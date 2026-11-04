@@ -1,8 +1,9 @@
 # Rotawise site: SEO check
 
-Checked on 3 Nov 2026 against the local build of `site/` (22 pages). The live site does not
-exist yet, because the GitHub repo has not been created. Run the check again on
-https://tjcraw6589.github.io/rotawise/ once it is published.
+Checked on 3 Nov 2026 against the local build of `site/` (22 pages), then again on the live
+site https://tjcraw6589.github.io/rotawise/ after it was published the same evening. Live
+result: all 12 sitemap pages load, titles and descriptions match the table below, structured
+data is present, all 25 internal links load, and the department pages carry noindex.
 
 Target searches: "firefighter shift calendar app" for the home page, and
 "24/48 shift calendar 2027", "Kelly schedule calendar", "Pitman schedule" and so on for the
@@ -34,7 +35,7 @@ from search engines on purpose.
 
 ## Still open
 
-1. **After the push:** add the site to Google Search Console and submit `sitemap.xml`. That needs your Google sign in.
+1. **Now that the site is live:** add it to Google Search Console and submit `sitemap.xml`. That needs your Google sign in.
 2. **When the app is live:** put the App Store link in `site/config.json` so the "coming soon" buttons become real links.
 3. **Home page heading** is the slogan "Your rotation, on your home screen." The title already carries "Shift Calendar for Firefighters, EMS and Police", so this was left as your brand line.
 4. **Rotation pages are mostly calendars.** A short "How the 24/48 works" section with two or three common questions would help them rank for question searches.
