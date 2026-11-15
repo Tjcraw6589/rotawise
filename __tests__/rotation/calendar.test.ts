@@ -49,6 +49,15 @@ describe('today card copy', () => {
     expect(morning.detail).toBe('24 hour tour until 7 AM today');
   });
 
+  it('names the day instead of a raw date when a long shift ends two or more days later', () => {
+    // A 72 hour holdover that starts on an off day (Jan 2) ends at 7 AM on Tuesday Jan 5.
+    const o: Override[] = [{ id: 'h', kind: 'extra', date: '2027-01-02', category: 'overtime', hours: 72, startMinutes: 7 * 60 }];
+    const c = todayCard(r, 'A', '2027-01-02', 9 * 60, o, t);
+    expect(c.headline).toBe("You're ON");
+    expect(c.detail).toMatch(/until 7 AM on Tue, Jan 5$/);
+    expect(c.detail).not.toMatch(/\d-\d/);
+  });
+
   it('OFF with days until the next shift', () => {
     expect(todayCard(r, 'A', '2027-01-02', 9 * 60, [], t).detail).toBe('Next shift in 2 days');
     expect(todayCard(r, 'A', '2027-01-03', 9 * 60, [], t).detail).toBe('Next shift tomorrow');

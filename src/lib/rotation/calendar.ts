@@ -1,4 +1,4 @@
-import { addDays, daysInMonth, eachDay, fromDayNumber, dayNumber, toISO, weekday } from './dates.ts';
+import { MONTH_SHORT, WEEKDAY_SHORT, addDays, daysInMonth, eachDay, fromDayNumber, dayNumber, parseISO, toISO, weekday } from './dates.ts';
 import type { ISODate } from './dates.ts';
 import { effectiveShifts, statusAt } from './schedule.ts';
 import type { Override, Platoon, Rotation, ShiftInstance } from './types.ts';
@@ -125,7 +125,13 @@ export function todayCard(rotation: Rotation, platoon: Platoon, date: ISODate, m
   if (status.on && status.current) {
     const c = status.current;
     const type = rotation.shiftTypes.find((t) => t.id === c.shiftTypeId);
-    const endWord = c.endDate === date ? 'today' : c.endDate === addDays(date, 1) ? 'tomorrow' : c.endDate;
+    // Never show a raw ISO date (it has hyphens): "on Mon, Jan 4", matching the widgets.
+    const endWord =
+      c.endDate === date
+        ? 'today'
+        : c.endDate === addDays(date, 1)
+          ? 'tomorrow'
+          : `on ${WEEKDAY_SHORT[weekday(c.endDate)]}, ${MONTH_SHORT[parseISO(c.endDate).month - 1]} ${parseISO(c.endDate).day}`;
     detail = `${type?.label ?? 'Shift'} until ${formatTime(c.endMinutes)} ${endWord}`;
   } else if (status.next) {
     const n = status.daysUntilNext ?? 0;

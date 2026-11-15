@@ -16,7 +16,8 @@ struct RotawiseProvider: TimelineProvider {
     }
 
     /// Entries at every local midnight and every shift start and end for the next three
-    /// days, so the widget flips ON and OFF at handover and rolls to the new date on its
+    /// days (every shift of a day, and long shifts that started days ago but end inside the
+    /// window), so the widget flips ON and OFF at handover and rolls to the new date on its
     /// own. When the entries run out WidgetKit asks for a new timeline.
     func getTimeline(in context: Context, completion: @escaping (Timeline<RotawiseEntry>) -> Void) {
         let snap = SnapshotStore.load()
@@ -29,14 +30,17 @@ struct RotawiseProvider: TimelineProvider {
                 moments.insert(midnight)
             }
         }
+        let horizon = now.addingTimeInterval(3 * 24 * 3600)
         if let snap = snap {
             for day in snap.days where day.on {
-                guard let n = Civil.dayNumber(day.d), n >= local.day - 2, n <= local.day + 3 else { continue }
-                if let start = Civil.date(day: n, minutes: day.s, calendar: cal) { moments.insert(start) }
-                if let end = Civil.date(day: n, minutes: day.s + day.m, calendar: cal) { moments.insert(end) }
+                guard let n = Civil.dayNumber(day.d), n <= local.day + 3 else { continue }
+                for shift in day.shifts {
+                    if let start = Civil.date(day: n, minutes: shift.s, calendar: cal), start >= now, start <= horizon { moments.insert(start) }
+                    // A shift counts when its end falls inside the window, however long ago it started.
+                    if let end = Civil.date(day: n, minutes: shift.s + shift.m, calendar: cal), end >= now, end <= horizon { moments.insert(end) }
+                }
             }
         }
-        let horizon = now.addingTimeInterval(3 * 24 * 3600)
         let entries = moments
             .filter { $0 >= now && $0 <= horizon }
             .sorted()

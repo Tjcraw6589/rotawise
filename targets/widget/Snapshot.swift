@@ -13,6 +13,23 @@ struct SnapshotDay: Codable {
     let s: Int
     let m: Int
     let l: String
+    /// Every working shift that starts this day, written only when there is more than one.
+    /// Optional so a snapshot saved by an older app version still decodes.
+    let sh: [SnapshotShift]?
+}
+
+struct SnapshotShift: Codable {
+    let s: Int
+    let m: Int
+    let l: String
+}
+
+extension SnapshotDay {
+    /// Every working shift that starts this day. Mirrors shiftsOfDay() in src/lib/widgetSnapshot.ts.
+    var shifts: [SnapshotShift] {
+        if let list = sh { return list }
+        return on ? [SnapshotShift(s: s, m: m, l: l)] : []
+    }
 }
 
 struct WidgetSnapshot: Codable {
@@ -126,6 +143,12 @@ func formatMinutes(_ minutes: Int, hour12: Bool) -> String {
     return mm == 0 ? "\(h12) \(suffix)" : String(format: "%ld:%02ld", h12, mm) + " " + suffix
 }
 
+/// "Thu, Nov 19" for a day number. Mirrors shortDateLabel() in src/lib/widgetSnapshot.ts.
+func shortDateLabel(_ n: Int) -> String {
+    let c = Civil.civil(n)
+    return "\(weekdayShort[Civil.weekday(n)]), \(monthShort[c.month - 1]) \(c.day)"
+}
+
 struct DayCell: Identifiable {
     let id: String
     let weekday: String
@@ -151,8 +174,7 @@ struct WidgetViewModel {
 func makeViewModel(_ snapshot: WidgetSnapshot?, at date: Date) -> WidgetViewModel {
     let now = Civil.local(date, calendar: Civil.gregorian)
     let today = now.day
-    let parts = Civil.civil(today)
-    let dateLabel = "\(weekdayShort[Civil.weekday(today)]), \(monthShort[parts.month - 1]) \(parts.day)"
+    let dateLabel = shortDateLabel(today)
     guard let snap = snapshot,
           let last = snap.days.last,
           let lastNum = Civil.dayNumber(last.d),
@@ -160,20 +182,24 @@ func makeViewModel(_ snapshot: WidgetSnapshot?, at date: Date) -> WidgetViewMode
         return WidgetViewModel(ok: false, on: false, status: "Open Rotawise", detail: "Open the app to refresh your rotation", dateLabel: dateLabel, platoon: "", fill: "#555555", text: "#FFFFFF", week: [])
     }
     let nowAbs = today * minutesPerDay + now.minutes
-    var current: SnapshotDay? = nil
+    var current: SnapshotShift? = nil
     var currentStart = 0
-    var next: SnapshotDay? = nil
-    for day in snap.days where day.on {
+    var next: SnapshotShift? = nil
+    var nextDay = 0
+    scan: for day in snap.days where day.on {
         guard let n = Civil.dayNumber(day.d) else { continue }
-        let start = n * minutesPerDay + day.s
-        let end = start + day.m
-        if current == nil && start <= nowAbs && nowAbs < end {
-            current = day
-            currentStart = start
-        }
-        if next == nil && start > nowAbs {
-            next = day
-            break
+        for shift in day.shifts {
+            let start = n * minutesPerDay + shift.s
+            let end = start + shift.m
+            if current == nil && start <= nowAbs && nowAbs < end {
+                current = shift
+                currentStart = start
+            }
+            if next == nil && start > nowAbs {
+                next = shift
+                nextDay = n
+                break scan
+            }
         }
     }
     var detail = "No shifts scheduled"
@@ -181,10 +207,10 @@ func makeViewModel(_ snapshot: WidgetSnapshot?, at date: Date) -> WidgetViewMode
         let endAbs = currentStart + cur.m
         let endDay = Civil.floorDiv(endAbs, minutesPerDay)
         let endMin = endAbs - endDay * minutesPerDay
-        let when = endDay == today ? "today" : (endDay == today + 1 ? "tomorrow" : Civil.iso(endDay))
+        let when = endDay == today ? "today" : (endDay == today + 1 ? "tomorrow" : "on \(shortDateLabel(endDay))")
         detail = "\(cur.l) until \(formatMinutes(endMin, hour12: snap.hour12)) \(when)"
-    } else if let nx = next, let n = Civil.dayNumber(nx.d) {
-        let days = n - today
+    } else if let nx = next {
+        let days = nextDay - today
         if days == 0 {
             detail = "Next shift today at \(formatMinutes(nx.s, hour12: snap.hour12))"
         } else if days == 1 {
@@ -211,7 +237,7 @@ extension WidgetSnapshot {
         var days: [SnapshotDay] = []
         for i in -2..<14 {
             let on = ((i % 3) + 3) % 3 == 0
-            days.append(SnapshotDay(d: Civil.iso(today + i), on: on, c: on ? "24" : "", s: on ? 420 : 0, m: on ? 1440 : 0, l: on ? "24 hour tour" : "Off"))
+            days.append(SnapshotDay(d: Civil.iso(today + i), on: on, c: on ? "24" : "", s: on ? 420 : 0, m: on ? 1440 : 0, l: on ? "24 hour tour" : "Off", sh: nil))
         }
         return WidgetSnapshot(v: 1, generated: Civil.iso(today), name: "Me", platoon: "A", fill: "#C24E00", text: "#FFFFFF", bg: "system", rotation: "24/48", hour12: true, days: days)
     }

@@ -12,7 +12,8 @@ export interface ProOffer {
   title: string;
 }
 
-export type PurchaseOutcome = 'purchased' | 'cancelled' | 'failed';
+/** 'pending' means the store took the payment or is waiting on approval (Ask to Buy) but Pro is not active yet. */
+export type PurchaseOutcome = 'purchased' | 'pending' | 'cancelled' | 'failed';
 export type RestoreOutcome = 'restored' | 'none' | 'failed';
 
 type PurchasesModule = typeof import('react-native-purchases');
@@ -25,6 +26,7 @@ export const getPurchasesStatus = status.get;
 
 let purchasesModule: PurchasesModule | null | undefined;
 let configured = false;
+let proListener: ((isPro: boolean) => void) | null = null;
 let cachedPackage: PurchasesPackage | null = null;
 
 function loadModule(): PurchasesModule | null {
@@ -47,12 +49,24 @@ export function hasProEntitlement(info: CustomerInfo): boolean {
   return typeof info.entitlements.active[PRO_ENTITLEMENT] !== 'undefined';
 }
 
+/** Reads the customer's entitlements. Failing (offline, say) is not fatal: the store still works once the connection is back. */
+async function checkCustomerInfo(mod: PurchasesModule): Promise<void> {
+  try {
+    const info = await mod.default.getCustomerInfo();
+    proListener?.(hasProEntitlement(info));
+  } catch {
+    // Keep the current Pro state; the update listener or the next refresh reports changes.
+  }
+}
+
 /**
  * Configures RevenueCat once and reports entitlement changes. Without an API key
  * (fresh clone, Expo Go, web preview) the store is marked unavailable and the
- * Pro screen explains that instead of failing.
+ * Pro screen explains that instead of failing. Configuring works offline, so the
+ * store is ready as soon as it succeeds; the entitlement check runs after that.
  */
 export async function configurePurchases(onProChange: (isPro: boolean) => void): Promise<void> {
+  proListener = onProChange;
   if (configured) return;
   const mod = loadModule();
   const apiKey = revenueCatApiKey();
@@ -60,19 +74,35 @@ export async function configurePurchases(onProChange: (isPro: boolean) => void):
     status.set('unavailable');
     return;
   }
-  configured = true;
   status.set('loading');
   try {
     const Purchases = mod.default;
     Purchases.setLogLevel(__DEV__ ? mod.LOG_LEVEL.WARN : mod.LOG_LEVEL.ERROR);
     Purchases.configure({ apiKey });
-    Purchases.addCustomerInfoUpdateListener((info) => onProChange(hasProEntitlement(info)));
-    const info = await Purchases.getCustomerInfo();
-    onProChange(hasProEntitlement(info));
-    status.set('ready');
+    Purchases.addCustomerInfoUpdateListener((info) => proListener?.(hasProEntitlement(info)));
+    configured = true;
   } catch {
     status.set('unavailable');
+    return;
   }
+  status.set('ready');
+  await checkCustomerInfo(mod);
+}
+
+/**
+ * Checks the store again, for a Try again button. Retries configuring if that failed
+ * earlier, otherwise re-reads the customer's entitlements. Resolves to the new status.
+ */
+export async function refreshPurchases(): Promise<StoreStatus> {
+  if (!configured) {
+    if (proListener) await configurePurchases(proListener);
+    return status.get();
+  }
+  const mod = loadModule();
+  if (!mod) return status.get();
+  status.set('ready');
+  await checkCustomerInfo(mod);
+  return status.get();
 }
 
 function pickProPackage(offerings: import('react-native-purchases').PurchasesOfferings): PurchasesPackage | null {
@@ -95,10 +125,19 @@ export async function fetchProOffer(): Promise<ProOffer | null> {
   }
 }
 
+function hasErrorCode(error: unknown, code: string | undefined): boolean {
+  if (typeof error !== 'object' || error === null || code === undefined) return false;
+  return (error as { code?: unknown }).code === code;
+}
+
 function isUserCancelled(error: unknown, mod: PurchasesModule): boolean {
-  if (typeof error !== 'object' || error === null) return false;
-  const e = error as { userCancelled?: boolean | null; code?: string };
-  return e.userCancelled === true || e.code === mod.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR;
+  if (typeof error === 'object' && error !== null && (error as { userCancelled?: boolean | null }).userCancelled === true) return true;
+  return hasErrorCode(error, mod.PURCHASES_ERROR_CODE?.PURCHASE_CANCELLED_ERROR);
+}
+
+/** Ask to Buy, or a payment the store has not settled yet. */
+function isPaymentPending(error: unknown, mod: PurchasesModule): boolean {
+  return hasErrorCode(error, mod.PURCHASES_ERROR_CODE?.PAYMENT_PENDING_ERROR);
 }
 
 export async function purchasePro(): Promise<PurchaseOutcome> {
@@ -108,9 +147,12 @@ export async function purchasePro(): Promise<PurchaseOutcome> {
     if (!cachedPackage) await fetchProOffer();
     if (!cachedPackage) return 'failed';
     const { customerInfo } = await mod.default.purchasePackage(cachedPackage);
-    return hasProEntitlement(customerInfo) ? 'purchased' : 'failed';
+    // The store finished but Pro is not active yet. The customer may well have paid, so this is never reported as a failure.
+    return hasProEntitlement(customerInfo) ? 'purchased' : 'pending';
   } catch (error) {
-    return isUserCancelled(error, mod) ? 'cancelled' : 'failed';
+    if (isUserCancelled(error, mod)) return 'cancelled';
+    if (isPaymentPending(error, mod)) return 'pending';
+    return 'failed';
   }
 }
 

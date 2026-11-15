@@ -178,14 +178,27 @@ describe('every preset', () => {
   });
 
   it.each(ALL_PRESETS)('%s averages the advertised hours per week over 7 years', (id) => {
-    const r = plain(id, ANCHOR);
+    // With the preset's own Kelly days, so the Kelly schedule figure counts them.
+    const r = rotationFromPreset(id, ANCHOR);
     const info = presetInfo(id);
     const from = '2024-01-01';
     const days = 7 * 364; // whole weeks, and a multiple of every cycle length (3, 4, 6, 7, 9, 14, 16, 28)
     const to = addDays(from, days - 1);
     // 2548 days divides by every cycle length except 3 (2548/3 is not whole), 6 and 9, so check closely.
-    const hours = baseShifts(r, 'A', from, to).reduce((h, s) => h + s.durationMinutes / 60, 0);
+    const hours = baseShifts(r, 'A', from, to)
+      .filter((s) => s.status === 'scheduled')
+      .reduce((h, s) => h + s.durationMinutes / 60, 0);
     expect(hours / (days / 7)).toBeCloseTo(info.hoursPerWeekAverage, 0);
+  });
+
+  it('the Kelly schedule averages 48 hours with a Kelly day every 7th tour, and 56 without', () => {
+    expect(presetInfo('kelly').hoursPerWeekAverage).toBe(48);
+    expect(rotationFromPreset('kelly', ANCHOR).kelly?.everyNthShift).toBe(7);
+    const from = '2024-01-01';
+    const to = addDays(from, 63 * 7 - 1); // 63 weeks is a whole number of 9 day cycles
+    const weekly = (r: Rotation) => baseShifts(r, 'A', from, to).filter((s) => s.status === 'scheduled').length * 24 / 63;
+    expect(weekly(plain('kelly', ANCHOR))).toBeCloseTo(56, 0);
+    expect(weekly(rotationFromPreset('kelly', ANCHOR))).toBeCloseTo(48, 0);
   });
 });
 

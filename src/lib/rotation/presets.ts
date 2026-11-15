@@ -187,7 +187,8 @@ export const PRESETS: PresetInfo[] = [
     usedBy: 'Fire departments with a Kelly day agreement',
     platoonCount: 3,
     cycleLength: 9,
-    hoursPerWeekAverage: 56,
+    // Three 24 hour tours every 9 days is 56 hours a week; the default Kelly day every 7th tour takes that to 56 x 6/7 = 48.
+    hoursPerWeekAverage: 48,
   },
   {
     id: 'pitman',

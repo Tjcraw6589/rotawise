@@ -10,7 +10,17 @@ import { Header } from '@/components/Header';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { successHaptic } from '@/services/haptics';
-import { billingStoreName, fetchProOffer, type ProOffer, purchasePro, purchasesSupported, restorePro, storeAccountName, usePurchasesStatus } from '@/services/purchases';
+import {
+  billingStoreName,
+  fetchProOffer,
+  type ProOffer,
+  purchasePro,
+  purchasesSupported,
+  refreshPurchases,
+  restorePro,
+  storeAccountName,
+  usePurchasesStatus,
+} from '@/services/purchases';
 import { useStore } from '@/store/useStore';
 import { useTheme } from '@/theme/useTheme';
 
@@ -50,11 +60,14 @@ export default function ProScreen() {
   const storeStatus = usePurchasesStatus();
   const [offer, setOffer] = useState<ProOffer | null>(null);
   const [busy, setBusy] = useState<null | 'buy' | 'restore'>(null);
+  const [checking, setChecking] = useState(false);
   const [message, setMessage] = useState<{ tone: 'success' | 'warning' | 'info'; text: string } | null>(null);
   const headline = HEADLINES[reason ?? 'general'] ?? HEADLINES.general!;
   const { fontScale } = useWindowDimensions();
   // At the largest accessibility text sizes a pinned footer would cover most of the screen, so it scrolls with the page instead.
   const pinFooter = fontScale < PIN_FOOTER_BELOW_FONT_SCALE;
+  // A pending purchase can be approved later (Ask to Buy); once Pro arrives the old notice no longer applies.
+  const shownMessage = isPro && message && message.tone !== 'success' ? null : message;
 
   useEffect(() => {
     let cancelled = false;
@@ -78,9 +91,20 @@ export default function ProScreen() {
       setMessage({ tone: 'success', text: 'Pro is unlocked for good. Thank you!' });
     } else if (outcome === 'cancelled') {
       setMessage({ tone: 'info', text: 'No problem. Everything in the free version keeps working.' });
+    } else if (outcome === 'pending') {
+      setMessage({ tone: 'info', text: `${billingStoreName()} is still confirming your purchase. Pro unlocks as soon as it does. If it does not, tap Restore purchases.` });
     } else {
-      setMessage({ tone: 'warning', text: 'The purchase did not go through, and you were not charged. Check your connection and try again.' });
+      // A failure can happen after the payment went through, so never promise the user was not charged.
+      setMessage({ tone: 'warning', text: 'Pro could not be confirmed. If you were charged, tap Restore purchases or try again in a minute.' });
     }
+  };
+
+  const retryStore = async () => {
+    setChecking(true);
+    const nextStatus = await refreshPurchases();
+    const nextOffer = nextStatus === 'ready' ? await fetchProOffer() : null;
+    setOffer(nextOffer);
+    setChecking(false);
   };
 
   const restore = async () => {
@@ -105,18 +129,21 @@ export default function ProScreen() {
   };
 
   const storeReady = storeStatus === 'ready' && offer !== null;
+  const connecting = storeStatus === 'loading' || checking;
   const unavailableText = !purchasesSupported
     ? 'Purchases work in the iPhone and Android apps. Everything in the free version works here.'
-    : storeStatus === 'loading'
+    : connecting
       ? 'Connecting to the store…'
-      : 'The store is unavailable right now. The free version keeps working; try again later.';
+      : 'The store is unavailable right now. Everything in the free version keeps working.';
+  // On the phone the store can come back (a connection returns), so offer a way to check again.
+  const canRetry = purchasesSupported && !connecting;
 
   // The price, the buy button and Restore stay pinned at the bottom, so nobody has to scroll to find them.
   const footer = (
     <View style={[styles.footer, { paddingHorizontal: spacing.lg, paddingTop: spacing.md, borderTopColor: colors.border, backgroundColor: colors.background }]}>
-      {message ? (
+      {shownMessage ? (
         <View style={{ marginBottom: spacing.md }}>
-          <Notice tone={message.tone} message={message.text} testID="pro-message" />
+          <Notice tone={shownMessage.tone} message={shownMessage.text} testID="pro-message" />
         </View>
       ) : null}
       {isPro ? (
@@ -125,7 +152,13 @@ export default function ProScreen() {
         <>
           {!storeReady ? (
             <View style={{ marginBottom: spacing.md }}>
-              <Notice tone="info" message={unavailableText} testID="store-unavailable" />
+              <Notice
+                tone="info"
+                message={unavailableText}
+                actionLabel={canRetry ? 'Try again' : undefined}
+                onAction={canRetry ? () => void retryStore() : undefined}
+                testID="store-unavailable"
+              />
             </View>
           ) : null}
           <Button

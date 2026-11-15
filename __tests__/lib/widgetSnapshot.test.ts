@@ -5,7 +5,8 @@ import { join } from 'node:path';
 import { defaultProfile } from '@/lib/model';
 import type { Override } from '@/lib/rotation';
 import { rotationFromPreset } from '@/lib/rotation';
-import { SNAPSHOT_DAYS, buildSnapshot, widgetColors, widgetView } from '@/lib/widgetSnapshot';
+import { SNAPSHOT_DAYS, SNAPSHOT_VERSION, buildSnapshot, widgetColors, widgetView } from '@/lib/widgetSnapshot';
+import type { WidgetSnapshot } from '@/lib/widgetSnapshot';
 
 const profile = { ...defaultProfile('2027-01-01'), rotation: rotationFromPreset('24-48', '2027-01-01', null), platoon: 'A' as const };
 
@@ -17,7 +18,8 @@ describe('widget snapshot', () => {
   it('covers more than a year ahead so widgets roll over without the app', () => {
     const s = snap();
     expect(s.days).toHaveLength(SNAPSHOT_DAYS + 2);
-    expect(s.days[0]!.d).toBe('2026-12-30');
+    // Three days back, so a 72 hour extra shift that started then is still in the snapshot.
+    expect(s.days[0]!.d).toBe('2026-12-29');
     expect(s.days[s.days.length - 1]!.d >= '2028-02-01').toBe(true);
     expect(s.platoon).toBe('A');
     expect(s.rotation).toBe('24/48');
@@ -99,6 +101,67 @@ describe('widget view (what the widgets show)', () => {
   });
 });
 
+describe('more than one shift on a day', () => {
+  // A works Jan 1, Jan 4 and Jan 7 (24 hour tours from 7 AM).
+  const overtime: Override[] = [
+    { id: 'am', kind: 'extra', date: '2027-01-02', category: 'overtime', hours: 4, startMinutes: 6 * 60 },
+    { id: 'pm', kind: 'extra', date: '2027-01-02', category: 'overtime', hours: 4, startMinutes: 18 * 60 },
+  ];
+  const hireback: Override[] = [{ id: 'hb', kind: 'extra', date: '2027-01-04', category: 'callback', hours: 4, startMinutes: 3 * 60 }];
+
+  it('stores every working shift of the day, not just the first', () => {
+    const s = snap(overtime);
+    expect(s.v).toBe(SNAPSHOT_VERSION);
+    expect(SNAPSHOT_VERSION).toBe(2);
+    const byDate = Object.fromEntries(s.days.map((d) => [d.d, d]));
+    expect(byDate['2027-01-02']).toMatchObject({ on: true, s: 360, m: 240, l: 'Extra shift' });
+    expect(byDate['2027-01-02']!.sh).toEqual([
+      { s: 360, m: 240, l: 'Extra shift' },
+      { s: 1080, m: 240, l: 'Extra shift' },
+    ]);
+    // Days with one shift stay as small as before.
+    expect(byDate['2027-01-01']!.sh).toBeUndefined();
+    expect(byDate['2027-01-03']!.sh).toBeUndefined();
+  });
+
+  it('ON during evening overtime after a morning shift on an off day', () => {
+    const s = snap(overtime);
+    expect(widgetView(s, '2027-01-02', 7 * 60)).toMatchObject({ on: true, status: 'ON', detail: 'Extra shift until 10 AM today' });
+    expect(widgetView(s, '2027-01-02', 12 * 60)).toMatchObject({ on: false, status: 'OFF', detail: 'Next shift today at 6 PM' });
+    expect(widgetView(s, '2027-01-02', 19 * 60)).toMatchObject({ on: true, status: 'ON', detail: 'Extra shift until 10 PM today' });
+    expect(widgetView(s, '2027-01-02', 22 * 60)).toMatchObject({ on: false, detail: 'Next shift in 2 days' });
+  });
+
+  it('ON for the tour after an early hireback that starts before it', () => {
+    const s = snap(hireback);
+    const day = s.days.find((d) => d.d === '2027-01-04')!;
+    expect(day.sh).toEqual([
+      { s: 180, m: 240, l: 'Extra shift' },
+      { s: 420, m: 1440, l: '24 hour tour' },
+    ]);
+    expect(widgetView(s, '2027-01-04', 2 * 60)).toMatchObject({ on: false, detail: 'Next shift today at 3 AM' });
+    expect(widgetView(s, '2027-01-04', 4 * 60)).toMatchObject({ on: true, detail: 'Extra shift until 7 AM today' });
+    expect(widgetView(s, '2027-01-04', 8 * 60)).toMatchObject({ on: true, status: 'ON', detail: '24 hour tour until 7 AM tomorrow' });
+    expect(widgetView(s, '2027-01-05', 6 * 60)).toMatchObject({ on: true, detail: '24 hour tour until 7 AM today' });
+    // The week strip still shows one cell per day.
+    expect(widgetView(s, '2027-01-04', 8 * 60).week[0]).toMatchObject({ date: '2027-01-04', on: true });
+  });
+
+  it('still reads a version 1 snapshot that has no list of shifts', () => {
+    const s = snap();
+    const old: WidgetSnapshot = { ...s, v: 1, days: s.days.map(({ sh: _sh, ...rest }) => rest) };
+    expect(widgetView(old, '2027-01-01', 600)).toMatchObject({ on: true, detail: '24 hour tour until 7 AM tomorrow' });
+    expect(widgetView(old, '2027-01-02', 420)).toMatchObject({ on: false, detail: 'Next shift in 2 days' });
+  });
+
+  it('a shift that ends two or more days later names the day without hyphens', () => {
+    const s = snap([{ id: 'long', kind: 'extra', date: '2027-01-02', category: 'extra-shift', hours: 44, startMinutes: 8 * 60 }]);
+    const v = widgetView(s, '2027-01-02', 12 * 60);
+    expect(v).toMatchObject({ on: true, detail: 'Extra shift until 4 AM on Mon, Jan 4' });
+    expect(v.detail).not.toMatch(/-/);
+  });
+});
+
 describe('the Swift widget mirrors the TypeScript rules', () => {
   const swift = readFileSync(join(__dirname, '../../targets/widget/Snapshot.swift'), 'utf8') + readFileSync(join(__dirname, '../../targets/widget/Widgets.swift'), 'utf8');
 
@@ -118,10 +181,31 @@ describe('the Swift widget mirrors the TypeScript rules', () => {
     for (const f of fields) expect(swift).toMatch(new RegExp(`let ${f}: `));
   });
 
+  it('reads every shift of a day, and an older snapshot without the list still decodes', () => {
+    const day = snap([{ id: 'hb', kind: 'extra', date: '2027-01-04', category: 'callback', hours: 4, startMinutes: 180 }]).days.find((d) => d.d === '2027-01-04')!;
+    for (const f of Object.keys(day.sh![0]!)) expect(swift).toMatch(new RegExp(`struct SnapshotShift: Codable \\{[^}]*let ${f}: `));
+    // Optional, so JSONDecoder accepts a version 1 snapshot that has no sh.
+    expect(swift).toContain('let sh: [SnapshotShift]?');
+    expect(swift).toContain('if let list = sh { return list }');
+    // The view model and the timeline both walk every shift.
+    expect(swift.match(/for shift in day\.shifts/g)).toHaveLength(2);
+    expect(swift).toContain('break scan');
+  });
+
+  it('names the end day like "Thu, Nov 19" instead of a raw date', () => {
+    expect(swift).not.toContain('Civil.iso(endDay)');
+    expect(swift).toContain('"on \\(shortDateLabel(endDay))"');
+    expect(swift).toContain('func shortDateLabel(_ n: Int) -> String');
+    expect(swift).toContain('monthShort[c.month - 1]');
+  });
+
   it('schedules timeline entries at midnight and at shift changes', () => {
     expect(swift).toContain('Civil.date(day: local.day + offset, minutes: 0');
-    expect(swift).toContain('minutes: day.s + day.m');
+    expect(swift).toContain('minutes: shift.s + shift.m');
     expect(swift).toContain('policy: .atEnd');
+    // A long shift that started days ago still gets an entry when it ends inside the window.
+    expect(swift).not.toContain('n >= local.day - 2');
+    expect(swift).toContain('end >= now, end <= horizon');
   });
 });
 

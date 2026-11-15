@@ -19,7 +19,9 @@ as asked. Character limits were checked with `node scripts/check-listing.mjs`.
 firefighter,24/48,kelly,platoon,pitman,dupont,ems,police,schedule,rotation,widget,overtime,nurse
 ```
 
-## Description (both stores)
+## Description (App Store)
+
+Apple does not allow other platforms to be named here, so the two stores get slightly different text.
 
 ```
 Your rotation, on your home screen. Pay once. Never a subscription.
@@ -41,12 +43,47 @@ PRO: ONE PAYMENT, YOURS FOREVER
 • Overtime and extra shift log with hour totals
 • Pay periods and paydays (weekly, biweekly, twice a month or custom) with estimated gross pay from your hourly rate and overtime multiplier
 • Vacation, sick and Kelly day balances
-• Share with a calendar: send shifts to Apple or Google Calendar so a partner can see them
+• Share with a calendar: send shifts to your iPhone calendar, including iCloud or Google calendars, so a partner can see them
 • More rotations: a second job or a partner's rotation overlaid in color
 • Print the year as a PDF or share it as an image
 • Color themes and widget colors
 
-Rotawise Pro is a one time purchase. It is not a subscription and never renews. Restore it on any device signed in to the same Apple or Google account.
+Rotawise Pro is a one time purchase. It is not a subscription and never renews. Restore it on any iPhone or iPad signed in to the same Apple Account.
+
+PRIVATE BY DESIGN
+No account. No ads. No analytics. No tracking. Your schedule stays on your phone.
+
+Rotawise calculates the rotation you set up. Always check your department's official schedule.
+```
+
+## Description (Google Play)
+
+```
+Your rotation, on your home screen. Pay once. Never a subscription.
+
+Rotawise is the shift calendar for firefighters, EMS, police, dispatchers, nurses and anyone on a rotating schedule. Set up your rotation in under a minute and see at a glance whether you're on or off today, and when your next shift starts.
+
+FREE, AND GENUINELY USEFUL
+• Every common rotation: 24/48, 48/96, 24/72, Kelly schedule, Pitman, DuPont, 2 2 3, 4 on 4 off and 3 twelves
+• Custom pattern builder: any sequence of days off, 24 hour tours, 12 hour days and nights, any start date
+• A, B, C and D platoons with high contrast colors that work for color blind eyes, always with a letter
+• See your platoon or every platoon at once
+• A 24 hour tour is one shift across two dates, not two day shifts
+• Kelly days at whatever interval your department uses
+• Month and year views, big and readable at a glance, with dark mode
+• Home screen widgets: Today (on or off, next shift) and Next 7 days. They update by themselves at midnight and at every shift change
+
+PRO: ONE PAYMENT, YOURS FOREVER
+• Trades and swaps ledger: who owes whom, and your calendar updates with every trade
+• Overtime and extra shift log with hour totals
+• Pay periods and paydays (weekly, biweekly, twice a month or custom) with estimated gross pay from your hourly rate and overtime multiplier
+• Vacation, sick and Kelly day balances
+• Share with a calendar: send shifts to a calendar on your phone, such as Google Calendar, so a partner can see them
+• More rotations: a second job or a partner's rotation overlaid in color
+• Print the year as a PDF or share it as an image
+• Color themes and widget colors
+
+Rotawise Pro is a one time purchase. It is not a subscription and never renews. Restore it on any Android phone or tablet signed in to the same Google account.
 
 PRIVATE BY DESIGN
 No account. No ads. No analytics. No tracking. Your schedule stays on your phone.
@@ -80,9 +117,10 @@ Rotawise calculates the rotation you set up. Always check your department's offi
 
 ## Privacy answers (App Store "App Privacy", Google "Data safety")
 
-Decided 2 Nov 2026: keep RevenueCat and answer honestly for it. The app itself sends nothing;
-RevenueCat, which checks the Pro purchase, receives an anonymous app user ID and the purchase
-receipt.
+Decided 2 Nov 2026: keep RevenueCat and answer honestly for it. The schedule never leaves the
+phone. On every launch the app asks RevenueCat whether Pro is unlocked, sending an anonymous app
+user ID plus basic device and app version details. The purchase receipt is sent only if the user
+buys Pro.
 
 **App Store, App Privacy:**
 1. "Do you or your third party partners collect data from this app?" **Yes**.

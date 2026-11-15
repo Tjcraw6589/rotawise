@@ -8,7 +8,7 @@ export interface ProOffer {
   title: string;
 }
 
-export type PurchaseOutcome = 'purchased' | 'cancelled' | 'failed';
+export type PurchaseOutcome = 'purchased' | 'pending' | 'cancelled' | 'failed';
 export type RestoreOutcome = 'restored' | 'none' | 'failed';
 
 /**
@@ -36,6 +36,11 @@ export const getPurchasesStatus = status.get;
 // the Pro screen in its "store unavailable" state.
 export async function configurePurchases(_onProChange: (isPro: boolean) => void): Promise<void> {
   status.set(storePreview() ? 'ready' : 'unavailable');
+}
+
+/** Nothing to reconnect to on the web; kept so shared screens can offer Try again. */
+export async function refreshPurchases(): Promise<StoreStatus> {
+  return status.get();
 }
 
 export async function fetchProOffer(): Promise<ProOffer | null> {

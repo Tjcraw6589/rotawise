@@ -1,7 +1,23 @@
 import { shiftEvents } from '@/lib/calendarEvents';
 import { defaultProfile, shiftWord } from '@/lib/model';
 import { rotationFromPreset } from '@/lib/rotation';
+import { exportShiftsToCalendar, removeExportedEvents } from '@/services/calendarExport';
+import { removeExportedEvents as removeNothingOnWeb } from '@/services/calendarExport.web';
 import { formatHours, formatMoney, formatNumber, parseAmount } from '@/lib/format';
+
+// The shared expo-calendar double plus getCalendarPermissionsAsync, which Erase all data uses.
+jest.mock('expo-calendar/legacy', () => ({
+  requestCalendarPermissionsAsync: jest.fn(async () => ({ status: 'granted', granted: true })),
+  getCalendarPermissionsAsync: jest.fn(async () => ({ status: 'granted', granted: true })),
+  getCalendarsAsync: jest.fn(async () => []),
+  getDefaultCalendarAsync: jest.fn(async () => ({ id: 'default', source: { id: 'src', name: 'Default' } })),
+  createCalendarAsync: jest.fn(async () => 'cal-1'),
+  createEventAsync: jest.fn(async () => 'evt-1'),
+  deleteEventAsync: jest.fn(async () => undefined),
+  getEventsAsync: jest.fn(async () => []),
+  EntityTypes: { EVENT: 'event' },
+  CalendarAccessLevel: { OWNER: 'owner' },
+}));
 
 describe('calendar export events', () => {
   const profile = { ...defaultProfile('2027-03-01'), rotation: rotationFromPreset('24-48', '2027-03-01', null), platoon: 'A' as const };
@@ -68,5 +84,55 @@ describe('calendar export without Intl time zones', () => {
     } finally {
       (Intl as { DateTimeFormat: unknown }).DateTimeFormat = real;
     }
+  });
+});
+
+describe('calendar export on the phone', () => {
+  const Calendar = jest.requireMock('expo-calendar/legacy') as Record<string, jest.Mock>;
+  const profile = { ...defaultProfile('2027-03-01'), rotation: rotationFromPreset('24-48', '2027-03-01', null), platoon: 'A' as const };
+
+  beforeEach(() => {
+    Calendar.deleteEventAsync!.mockClear();
+    Calendar.createEventAsync!.mockClear();
+    Calendar.getEventsAsync!.mockClear();
+  });
+
+  it('clears leftover Rotawise events from its own calendar before adding, so nothing shows twice', async () => {
+    Calendar.getCalendarsAsync!.mockResolvedValue([{ id: 'ours', title: 'Rotawise shifts', allowsModifications: true }]);
+    Calendar.getEventsAsync!.mockResolvedValueOnce([
+      { id: 'old1', notes: 'Added by Rotawise. Exporting again replaces these events.' },
+      { id: 'mine', notes: 'Dentist' },
+      { id: 'old2', notes: 'Added by Rotawise. Exporting again replaces these events.' },
+    ]);
+    const r = await exportShiftsToCalendar({ profile, overrides: [], monthsAhead: 1, previousCalendarId: null, previousEventIds: ['saved'] });
+    expect(r.ok).toBe(true);
+    expect(r.calendarId).toBe('ours');
+    expect(Calendar.getEventsAsync!.mock.calls[0]![0]).toEqual(['ours']);
+    expect(Calendar.deleteEventAsync!.mock.calls.map((c) => c[0])).toEqual(['saved', 'old1', 'old2']);
+    expect(Calendar.createEventAsync).toHaveBeenCalled();
+    // The note it matches on is the one every exported event carries.
+    expect(shiftEvents(profile, [], '2027-03-01', '2027-03-02', 'UTC')[0]!.notes.startsWith('Added by Rotawise')).toBe(true);
+  });
+
+  it('never reads events in a calendar the user picked that is not the Rotawise one', async () => {
+    Calendar.getCalendarsAsync!.mockResolvedValue([{ id: 'family', title: 'Family', allowsModifications: true }]);
+    await exportShiftsToCalendar({ profile, overrides: [], monthsAhead: 1, previousCalendarId: 'family', previousEventIds: [] });
+    expect(Calendar.getEventsAsync).not.toHaveBeenCalled();
+    expect(Calendar.deleteEventAsync).not.toHaveBeenCalled();
+  });
+
+  it('removeExportedEvents deletes saved events and never throws', async () => {
+    Calendar.getCalendarPermissionsAsync!.mockResolvedValue({ status: 'granted', granted: true });
+    Calendar.deleteEventAsync!.mockRejectedValueOnce(new Error('gone'));
+    await expect(removeExportedEvents(['a', 'b'])).resolves.toBeUndefined();
+    expect(Calendar.deleteEventAsync!.mock.calls.map((c) => c[0])).toEqual(['a', 'b']);
+    Calendar.getCalendarPermissionsAsync!.mockResolvedValue({ status: 'denied', granted: false });
+    Calendar.deleteEventAsync!.mockClear();
+    await expect(removeExportedEvents(['c'])).resolves.toBeUndefined();
+    expect(Calendar.deleteEventAsync).not.toHaveBeenCalled();
+  });
+
+  it('the web version has nothing to remove', async () => {
+    await expect(removeNothingOnWeb(['a'])).resolves.toBeUndefined();
   });
 });

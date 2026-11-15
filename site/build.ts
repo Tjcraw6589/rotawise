@@ -240,7 +240,7 @@ for (const id of TEMPLATE_PRESETS) {
     ],
     body: `<nav class="crumbs no-print" aria-label="Breadcrumb"><a href="../../">Home</a> › <a href="../../#rotations">Rotations</a> › ${escapeHtml(name)}</nav>
 <div class="hero"><h1>${escapeHtml(name)} Shift Calendar ${YEAR}</h1>
-<p class="lead">${escapeHtml(info.description)} Used by ${escapeHtml(info.usedBy.charAt(0).toLowerCase() + info.usedBy.slice(1))}. About ${info.hoursPerWeekAverage} hours a week on average.</p>
+<p class="lead">${escapeHtml(info.description)} Used by ${escapeHtml(info.usedBy.charAt(0).toLowerCase() + info.usedBy.slice(1))}. About ${info.hoursPerWeekAverage} hours a week on average${rotation.kelly ? `, including a Kelly day off every ${rotation.kelly.everyNthShift}th tour` : ''}.</p>
 ${legend(rotation.platoonCount)}
 <p class="banner">Template: platoon A starts its cycle on January 1, ${YEAR}. Your department's start date is probably different.${escapeHtml(kellyNote)} The Rotawise app lines it up with your real dates in a few taps.</p>
 ${storeButtons()}</div>
@@ -383,15 +383,15 @@ page({
   path: 'privacy.html',
   title: 'Rotawise Privacy Policy',
   description: 'Your schedule never leaves your phone. No account, no ads, no analytics, no tracking.',
-  body: `<div class="hero"><h1>Privacy Policy</h1><p class="lead">Short version: your schedule never leaves your phone. The only thing that leaves it is an anonymous purchase receipt, and only if you buy Pro.</p></div>
+  body: `<div class="hero"><h1>Privacy Policy</h1><p class="lead">Short version: your schedule never leaves your phone. To check whether Pro is unlocked, the app asks RevenueCat each time it opens, sending an anonymous app ID and basic device and app version details. If you buy Pro, the purchase receipt goes there too.</p></div>
 <div class="card">
 <h3>What stays on your phone</h3><p>Your rotation, platoon, trades, overtime, pay settings and leave are stored only in a database on your device. They are never sent to us or anyone else. Deleting the app deletes them.</p>
 <h3 style="margin-top:16px">No account, ads, analytics or tracking</h3><p>Rotawise has no sign in, shows no ads, contains no analytics and does not track you across apps or websites.</p>
-<h3 style="margin-top:16px">Purchases</h3><p>Rotawise Pro is a one time in app purchase handled by Apple (App Store) or Google (Google Play). To confirm and restore the purchase, the app uses RevenueCat, which receives an anonymous app user ID and the store's purchase receipt. This is not linked to your name, email or schedule. See RevenueCat's privacy policy at revenuecat.com.</p>
-<h3 style="margin-top:16px">Calendar</h3><p>Only if you use Share with a calendar, the app asks for calendar access and adds your shifts to the calendar you pick. It does not read your other events.</p>
+<h3 style="margin-top:16px">Purchases</h3><p>Rotawise Pro is a one time in app purchase handled by Apple (App Store) or Google (Google Play). The app uses RevenueCat to confirm and restore the purchase. Each time the app opens, it checks with RevenueCat whether Pro is unlocked. That check sends an anonymous app user ID plus basic device and app version details, such as the operating system and app version, whether or not you buy. If you buy Pro, RevenueCat also receives the store's purchase receipt. None of this includes your schedule, and it is not linked to your name or email. See RevenueCat's privacy policy at revenuecat.com.</p>
+<h3 style="margin-top:16px">Calendar</h3><p>Only if you use Share with a calendar, the app asks for calendar access and adds your shifts to the calendar you pick. It does not read your other events. Those shift events stay in your calendar if you delete the app. Erase all data in Settings removes them while calendar access is on, or you can delete them in your Calendar app.</p>
 <h3 style="margin-top:16px">Widgets</h3><p>Home screen widgets read a copy of your schedule that the app keeps on your device for them.</p>
 <h3 style="margin-top:16px">Children</h3><p>Rotawise is not directed at children and collects no personal information from anyone.</p>
-<h3 style="margin-top:16px">Contact</h3><p>Questions: <a href="mailto:${escapeHtml(config.supportEmail)}">${escapeHtml(config.supportEmail)}</a>. Last updated November 2, 2026.</p>
+<h3 style="margin-top:16px">Contact</h3><p>Questions: <a href="mailto:${escapeHtml(config.supportEmail)}">${escapeHtml(config.supportEmail)}</a>. Last updated November 15, 2026.</p>
 </div>`,
 });
 page({

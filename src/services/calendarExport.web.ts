@@ -28,3 +28,8 @@ export async function exportShiftsToCalendar(args: {
 }): Promise<ExportResult> {
   return { ok: false, message: 'Calendar export works in the iPhone and Android apps.', calendarId: args.previousCalendarId, eventIds: args.previousEventIds };
 }
+
+/** Nothing was ever added to a calendar on the web, so there is nothing to remove. */
+export async function removeExportedEvents(_eventIds: readonly string[]): Promise<void> {
+  return;
+}

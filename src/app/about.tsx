@@ -16,10 +16,13 @@ const PRIVACY: { title: string; body: string }[] = [
   { title: 'No ads, analytics or tracking', body: 'Rotawise has no advertising, no analytics and no tracking of any kind.' },
   {
     title: 'Purchases',
-    body: 'If you buy Pro, Apple or Google handles the payment. RevenueCat, the service that checks the purchase, receives an anonymous app ID and the purchase receipt so Pro can be confirmed and restored. It is never linked to your name or your schedule.',
+    body: 'Each time Rotawise opens, it checks with RevenueCat whether Pro is unlocked. That sends an anonymous app ID plus basic device and app version details. If you buy Pro, Apple or Google handles the payment and RevenueCat also gets the purchase receipt so Pro can be confirmed and restored. None of this includes your schedule, and it is never linked to your name.',
   },
   { title: 'Calendar', body: 'Only if you use Share with a calendar, Rotawise adds your shifts to the calendar you pick. It does not read your other events.' },
-  { title: 'Deleting your data', body: 'Settings, Erase all data removes everything. Deleting the app does the same.' },
+  {
+    title: 'Deleting your data',
+    body: 'Settings, Erase all data removes everything. While calendar access is on, it also takes the shifts Rotawise added back out of your calendar. Deleting the app removes your data from this phone, but shifts already added to a calendar stay there until you delete them in your Calendar app.',
+  },
 ];
 
 export default function AboutScreen() {

@@ -20,10 +20,21 @@ import type { PaletteId } from '@/lib/model';
 import { PLATOONS, presetInfo } from '@/lib/rotation';
 import type { Platoon } from '@/lib/rotation';
 import { successHaptic } from '@/services/haptics';
-import { restorePro, storeAccountName, usePurchasesStatus } from '@/services/purchases';
+import { billingStoreName, getPurchasesStatus, purchasesSupported, refreshPurchases, restorePro, storeAccountName } from '@/services/purchases';
 import { useStore } from '@/store/useStore';
 import { PALETTES } from '@/theme/tokens';
 import { useTheme } from '@/theme/useTheme';
+
+/** Why Restore purchases did not work. Only the web build has no store at all. */
+function restoreFailedText(): string {
+  if (!purchasesSupported) return 'Purchases work in the iPhone and Android apps.';
+  const status = getPurchasesStatus();
+  if (status === 'loading' || status === 'unconfigured') {
+    const store = billingStoreName() === 'Google Play' ? 'Google Play' : 'the App Store';
+    return `Still connecting to ${store}. Try again in a moment.`;
+  }
+  return 'The store could not be reached. Check your connection and try again.';
+}
 
 export default function SettingsScreen() {
   const { colors, spacing, scheme } = useTheme();
@@ -35,7 +46,6 @@ export default function SettingsScreen() {
   const setPro = useStore((s) => s.setPro);
   const resetAll = useStore((s) => s.resetAll);
   const { isPro, requirePro } = useProGate();
-  const storeStatus = usePurchasesStatus();
   const [sheet, setSheet] = useState<null | 'platoon' | 'palette' | 'erase'>(null);
   const [message, setMessage] = useState<{ tone: 'success' | 'info' | 'warning'; text: string } | null>(null);
   const [restoring, setRestoring] = useState(false);
@@ -44,6 +54,8 @@ export default function SettingsScreen() {
   const restore = async () => {
     if (restoring) return;
     setRestoring(true);
+    // If the store could not be reached at launch, check again before restoring.
+    if (purchasesSupported && getPurchasesStatus() === 'unavailable') await refreshPurchases();
     const outcome = await restorePro();
     setRestoring(false);
     if (outcome === 'restored') {
@@ -54,7 +66,7 @@ export default function SettingsScreen() {
       const account = storeAccountName();
       setMessage({ tone: 'info', text: `No Pro purchase was found for this ${account}. Make sure this device uses the ${account} you bought Pro with, then try again.` });
     } else {
-      setMessage({ tone: 'warning', text: storeStatus === 'unavailable' ? 'Purchases work in the iPhone and Android apps.' : 'The store could not be reached. Check your connection and try again.' });
+      setMessage({ tone: 'warning', text: restoreFailedText() });
     }
   };
 
@@ -165,7 +177,7 @@ export default function SettingsScreen() {
       <ConfirmSheet
         visible={sheet === 'erase'}
         title="Erase all data?"
-        message="Your rotations, trades, overtime and leave will be deleted from this phone. This cannot be undone. Pro stays unlocked."
+        message="Your rotations, trades, overtime and leave will be deleted from this phone, and shifts Rotawise added to your calendar are removed too. This cannot be undone. Pro stays unlocked."
         confirmLabel="Erase everything"
         destructive
         onConfirm={() => {

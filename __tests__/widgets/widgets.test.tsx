@@ -2,7 +2,7 @@ import { buildWidgetTree } from 'react-native-android-widget/src/api/build-widge
 
 import { defaultProfile } from '@/lib/model';
 import { rotationFromPreset } from '@/lib/rotation';
-import { buildSnapshot } from '@/lib/widgetSnapshot';
+import { SNAPSHOT_VERSION, buildSnapshot } from '@/lib/widgetSnapshot';
 import { useStore } from '@/store/useStore';
 
 import { resetStore } from '../helpers';
@@ -43,6 +43,29 @@ describe('Android widgets', () => {
     expect(t.slice(0, 3)).toEqual(['Today: OFF', 'B', 'Next shift in 2 days']);
     // Sun 3 .. Sat 9: B works Jan 5 and Jan 8.
     expect(t.slice(3)).toEqual(['Su', '3', 'off', 'Mo', '4', 'off', 'Tu', '5', 'B', 'We', '6', 'off', 'Th', '7', 'off', 'Fr', '8', 'B', 'Sa', '9', 'off']);
+  });
+
+  it('the small widget shows ON for every shift of a day, not just the first', () => {
+    // B works Jan 2 and Jan 5. An early hireback on Jan 5 starts before the tour, and
+    // Jan 3 has a morning shift and evening overtime.
+    const busy = buildSnapshot({
+      profile,
+      overrides: [
+        { id: 'hb', kind: 'extra', date: '2027-01-05', category: 'callback', hours: 4, startMinutes: 3 * 60 },
+        { id: 'am', kind: 'extra', date: '2027-01-03', category: 'overtime', hours: 4, startMinutes: 6 * 60 },
+        { id: 'pm', kind: 'extra', date: '2027-01-03', category: 'overtime', hours: 4, startMinutes: 18 * 60 },
+      ],
+      today: '2027-01-02',
+      hour12: true,
+      background: 'system',
+    });
+    const small = (at: Date) => {
+      const rep = renderWidget('Today', busy, at);
+      if (!('light' in rep)) throw new Error('expected light and dark versions');
+      return texts(buildWidgetTree(rep.light) as unknown as Tree);
+    };
+    expect(small(new Date(2027, 0, 3, 19, 0))).toEqual(['Sun, Jan 3', 'B', 'ON', 'Extra shift until 10 PM today']);
+    expect(small(new Date(2027, 0, 5, 9, 0))).toEqual(['Tue, Jan 5', 'B', 'ON', '24 hour tour until 7 AM tomorrow']);
   });
 
   it('a platoon colored widget has no separate dark version', () => {
@@ -88,7 +111,7 @@ describe('iOS widget data', () => {
     syncWidgets(true);
     const raw = targets.__store.get('snapshot') as string;
     const parsed = JSON.parse(raw);
-    expect(parsed.v).toBe(1);
+    expect(parsed.v).toBe(SNAPSHOT_VERSION);
     expect(parsed.platoon).toBe('A');
     expect(targets.ExtensionStorage.reloadWidget).toHaveBeenCalledTimes(1);
 

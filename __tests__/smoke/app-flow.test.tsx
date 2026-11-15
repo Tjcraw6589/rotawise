@@ -254,4 +254,17 @@ describe('Rotawise app flow (router)', () => {
     expect(baseShiftOn(r, 'A', '2027-01-02')).not.toBeNull();
     expect(baseShiftOn(r, 'A', '2027-01-01')).toBeNull();
   });
+
+  test('the privacy screen tells the truth about RevenueCat and calendar events', async () => {
+    resetStore({ profile: proProfile });
+    await renderRouter('./src/app', { initialUrl: '/about?doc=privacy' });
+    await screen.findByTestId('privacy-screen');
+    const text = visibleText().join(' ');
+    // The Pro check runs on every launch, not only after a purchase.
+    expect(text).toContain('Each time Rotawise opens, it checks with RevenueCat whether Pro is unlocked');
+    expect(text).toContain('If you buy Pro');
+    // Deleting the app does not reach into the calendar.
+    expect(text).toContain('shifts already added to a calendar stay there until you delete them in your Calendar app');
+    expect(text).not.toContain('Deleting the app does the same');
+  });
 });

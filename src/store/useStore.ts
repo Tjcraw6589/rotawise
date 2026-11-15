@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import type { Meta, Profile, Settings, StoredOverride } from '@/lib/model';
 import { DEFAULT_PROFILE_ID, PROFILE_COLORS, defaultProfile, defaultSettings, newId } from '@/lib/model';
 import type { Override, Platoon, Rotation } from '@/lib/rotation';
+import { removeExportedEvents } from '@/services/calendarExport';
 
 import { docStore } from './storage';
 import type { DocStore } from './storageTypes';
@@ -180,6 +181,9 @@ export function createAppStore(store: DocStore) {
       },
 
       resetAll() {
+        // Take the shifts that Share with a calendar added back out of the calendar too. Best effort,
+        // in the background, so a missing permission or a calendar error never stops the erase.
+        void removeExportedEvents(get().settings.calendarExport.eventIds).catch(() => undefined);
         store.clear(C.profiles);
         store.clear(C.overrides);
         const isPro = get().meta.isPro;

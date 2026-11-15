@@ -3,6 +3,20 @@ import { createAppStore, loadData } from '@/store/useStore';
 
 import { memoryDocStore } from '../helpers';
 
+// The shared expo-calendar double plus getCalendarPermissionsAsync, which Erase all data uses.
+jest.mock('expo-calendar/legacy', () => ({
+  requestCalendarPermissionsAsync: jest.fn(async () => ({ status: 'granted', granted: true })),
+  getCalendarPermissionsAsync: jest.fn(async () => ({ status: 'granted', granted: true })),
+  getCalendarsAsync: jest.fn(async () => []),
+  getDefaultCalendarAsync: jest.fn(async () => ({ id: 'default', source: { id: 'src', name: 'Default' } })),
+  createCalendarAsync: jest.fn(async () => 'cal-1'),
+  createEventAsync: jest.fn(async () => 'evt-1'),
+  deleteEventAsync: jest.fn(async () => undefined),
+  getEventsAsync: jest.fn(async () => []),
+  EntityTypes: { EVENT: 'event' },
+  CalendarAccessLevel: { OWNER: 'owner' },
+}));
+
 describe('app store', () => {
   it('starts with one default rotation and onboarding not done', () => {
     const db = memoryDocStore();
@@ -71,6 +85,37 @@ describe('app store', () => {
     expect(s.meta.isPro).toBe(true);
     expect(s.settings.onboardingComplete).toBe(false);
     expect(s.profiles[0]!.rotation.presetId).toBe('24-48');
+  });
+
+  it('erase all also takes exported shifts back out of the calendar', async () => {
+    const Calendar = jest.requireMock('expo-calendar/legacy') as Record<string, jest.Mock>;
+    Calendar.getCalendarPermissionsAsync!.mockResolvedValue({ status: 'granted', granted: true });
+    Calendar.deleteEventAsync!.mockClear();
+    const store = createAppStore(memoryDocStore());
+    store.getState().updateSettings({ calendarExport: { calendarId: 'cal-1', eventIds: ['e1', 'e2'], lastExportAt: '2027-01-01T00:00:00.000Z', monthsAhead: 12 } });
+    store.getState().resetAll();
+    expect(store.getState().settings.calendarExport.eventIds).toEqual([]);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(Calendar.deleteEventAsync!.mock.calls.map((c) => c[0])).toEqual(['e1', 'e2']);
+  });
+
+  it('erase all still finishes when calendar access is off or the calendar fails', async () => {
+    const Calendar = jest.requireMock('expo-calendar/legacy') as Record<string, jest.Mock>;
+    Calendar.deleteEventAsync!.mockClear();
+    Calendar.getCalendarPermissionsAsync!.mockResolvedValue({ status: 'denied', granted: false });
+    const store = createAppStore(memoryDocStore());
+    store.getState().updateSettings({ calendarExport: { calendarId: 'cal-1', eventIds: ['e1'], lastExportAt: null, monthsAhead: 12 } });
+    store.getState().resetAll();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(Calendar.deleteEventAsync).not.toHaveBeenCalled();
+    expect(store.getState().settings.calendarExport.eventIds).toEqual([]);
+
+    Calendar.getCalendarPermissionsAsync!.mockRejectedValue(new Error('no calendar'));
+    store.getState().updateSettings({ calendarExport: { calendarId: 'cal-1', eventIds: ['e2'], lastExportAt: null, monthsAhead: 12 } });
+    expect(() => store.getState().resetAll()).not.toThrow();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(store.getState().settings.onboardingComplete).toBe(false);
+    expect(store.getState().settings.calendarExport.eventIds).toEqual([]);
   });
 
   it('survives unreadable data', () => {
